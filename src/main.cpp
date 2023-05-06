@@ -17,9 +17,30 @@ int Gas_digital = 2; // used for ESP32
 
 Adafruit_SGP30 sgp;
 
+// Include the ESP32 encoder library
+#include <ESP32Encoder.h>
+
+// Define the encoder pins
+#define CLK_PIN 26
+#define DT_PIN 27
+#define SW_PIN 25
+
+// Initialize the encoder
+ESP32Encoder encoder;
+
 void setup()
 {
   Serial.begin(115200);
+
+  pinMode(CLK_PIN, INPUT);
+  pinMode(DT_PIN, INPUT);
+  pinMode(SW_PIN, INPUT_PULLUP);
+
+  encoder.attachHalfQuad(CLK_PIN, DT_PIN);
+
+// Set the initial position of the encoder
+  encoder.setCount(0);
+
 
   if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C))
   { // Address 0x3D for 128x64
@@ -42,6 +63,13 @@ void setup()
 void loop()
 {
 
+  long newPosition = encoder.getCount();
+
+  if (digitalRead(SW_PIN) == LOW)
+  {
+    encoder.setCount(0); // Reset the encoder position
+  }
+
   unsigned long currentMillis = millis();
   // reset currentMillis to 0 after 30 days
   if (currentMillis > 2592000000)
@@ -49,16 +77,10 @@ void loop()
     currentMillis = 0;
   }
 
-
   int gassensorAnalog = analogRead(Gas_analog);
   int gassensorDigital = digitalRead(Gas_digital);
 
-  if (!sgp.IAQmeasure())
-  {
-    Serial.println("Błąd podczas pomiaru IAQ!");
-    return;
-  }
-
+  sgp.IAQmeasure();
   int TVOC = sgp.TVOC;
   int eCO2 = sgp.eCO2;
 
@@ -85,18 +107,32 @@ void loop()
     display.println(gassensorAnalog);
 
     // Display SGP30 measurements
-    display.setCursor(0, 30);
+    display.setCursor(0, 20);
     display.println("SGP30 TVOC: ");
-    display.setCursor(75, 30);
+    display.setCursor(75, 20);
     display.println(TVOC);
-    display.setCursor(0, 40);
+    display.setCursor(0, 30);
     display.println("SGP30 eCO2: ");
-    display.setCursor(75, 40);
+    display.setCursor(75, 30);
     display.println(eCO2);
+    // set cursor to new line and display encoder newposition
+    display.setCursor(0, 40);
+    display.println("Encoder: ");
+    display.setCursor(60, 40);
+    display.println(newPosition/2);
+    // convert currentmilis to second and display it
+    display.setCursor(0, 50);
+    display.println("Millis: ");
+    display.setCursor(60, 50);
+    display.println(currentMillis / 1000);
+
+
 
     // Update the display
     display.display();
 
     lastDisplayUpdate = currentMillis;
   }
+
+
 }
