@@ -6,6 +6,9 @@
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
+unsigned long lastDisplayUpdate = 0;
+const unsigned long displayUpdateInterval = 100;
+
 // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
@@ -38,6 +41,15 @@ void setup()
 
 void loop()
 {
+
+  unsigned long currentMillis = millis();
+  // reset currentMillis to 0 after 30 days
+  if (currentMillis > 2592000000)
+  {
+    currentMillis = 0;
+  }
+
+
   int gassensorAnalog = analogRead(Gas_analog);
   int gassensorDigital = digitalRead(Gas_digital);
 
@@ -50,38 +62,41 @@ void loop()
   int TVOC = sgp.TVOC;
   int eCO2 = sgp.eCO2;
 
-  // Clear the display
-  display.clearDisplay();
+  if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
+  {
+    // Clear the display
+    display.clearDisplay();
 
-  // Set the text size to 1
-  display.setTextSize(1);
+    // Set the text size to 1
+    display.setTextSize(1);
 
-  // Set the text color to white
-  display.setTextColor(WHITE);
+    // Set the text color to white
+    display.setTextColor(WHITE);
 
-  // Set the cursor position to (0, 10)
-  display.setCursor(0, 10);
-  display.println("MQ2 D: ");
-  display.setCursor(35, 10);
-  display.println(gassensorDigital);
-  // set cursor in new line
-  display.setCursor(45, 10);
-  display.println("A: ");
-  display.setCursor(60, 10);
-  display.println(gassensorAnalog);
+    // Set the cursor position to (0, 10)
+    display.setCursor(0, 10);
+    display.println("MQ2 D: ");
+    display.setCursor(35, 10);
+    display.println(gassensorDigital);
+    // set cursor in new line
+    display.setCursor(45, 10);
+    display.println("A: ");
+    display.setCursor(60, 10);
+    display.println(gassensorAnalog);
 
-  // Display SGP30 measurements
-  display.setCursor(0, 30);
-  display.println("SGP30 TVOC: ");
-  display.setCursor(75, 30);
-  display.println(TVOC);
-  display.setCursor(0, 40);
-  display.println("SGP30 eCO2: ");
-  display.setCursor(75, 40);
-  display.println(eCO2);
+    // Display SGP30 measurements
+    display.setCursor(0, 30);
+    display.println("SGP30 TVOC: ");
+    display.setCursor(75, 30);
+    display.println(TVOC);
+    display.setCursor(0, 40);
+    display.println("SGP30 eCO2: ");
+    display.setCursor(75, 40);
+    display.println(eCO2);
 
-  // Update the display
-  display.display();
+    // Update the display
+    display.display();
 
-  delay(100);
+    lastDisplayUpdate = currentMillis;
+  }
 }
