@@ -38,9 +38,8 @@ void setup()
 
   encoder.attachHalfQuad(CLK_PIN, DT_PIN);
 
-// Set the initial position of the encoder
+  // Set the initial position of the encoder
   encoder.setCount(0);
-
 
   if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C))
   { // Address 0x3D for 128x64
@@ -84,55 +83,112 @@ void loop()
   int TVOC = sgp.TVOC;
   int eCO2 = sgp.eCO2;
 
-  if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
+  switch (newPosition / 2)
   {
-    // Clear the display
-    display.clearDisplay();
+  case 0:
+    if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
+    {
+      // Clear the display
+      display.clearDisplay();
 
-    // Set the text size to 1
-    display.setTextSize(1);
+      // Set the text size to 1
+      display.setTextSize(1);
 
-    // Set the text color to white
-    display.setTextColor(WHITE);
+      // Set the text color to white
+      display.setTextColor(WHITE);
 
-    // Set the cursor position to (0, 10)
-    display.setCursor(0, 10);
-    display.println("MQ2 D: ");
-    display.setCursor(35, 10);
-    display.println(gassensorDigital);
-    // set cursor in new line
-    display.setCursor(45, 10);
-    display.println("A: ");
-    display.setCursor(60, 10);
-    display.println(gassensorAnalog);
+      // Set the cursor position to (0, 10)
+      display.setCursor(0, 10);
+      display.println("MQ2 D: ");
+      display.setCursor(35, 10);
+      display.println(gassensorDigital);
+      // set cursor in new line
+      display.setCursor(45, 10);
+      display.println("A: ");
+      display.setCursor(60, 10);
+      display.println(gassensorAnalog);
 
-    // Display SGP30 measurements
-    display.setCursor(0, 20);
-    display.println("SGP30 TVOC: ");
-    display.setCursor(75, 20);
-    display.println(TVOC);
-    display.setCursor(0, 30);
-    display.println("SGP30 eCO2: ");
-    display.setCursor(75, 30);
-    display.println(eCO2);
-    // set cursor to new line and display encoder newposition
-    display.setCursor(0, 40);
-    display.println("Encoder: ");
-    display.setCursor(60, 40);
-    display.println(newPosition/2);
-    // convert currentmilis to second and display it
-    display.setCursor(0, 50);
-    display.println("Millis: ");
-    display.setCursor(60, 50);
-    display.println(currentMillis / 1000);
+      // Display SGP30 measurements
+      display.setCursor(0, 20);
+      display.println("SGP30 TVOC: ");
+      display.setCursor(75, 20);
+      display.println(TVOC);
+      display.setCursor(0, 30);
+      display.println("SGP30 eCO2: ");
+      display.setCursor(75, 30);
+      display.println(eCO2);
+      // set cursor to new line and display encoder newposition
+      display.setCursor(0, 40);
+      display.println("Encoder: ");
+      display.setCursor(60, 40);
+      display.println(newPosition / 2);
+      // convert currentmilis to second and display it
+      display.setCursor(0, 50);
+      display.println("Millis: ");
+      display.setCursor(60, 50);
+      display.println(currentMillis / 1000);
 
+      // Update the display
+      display.display();
 
+      lastDisplayUpdate = currentMillis;
+    }
+    break;
+  case 1:
+    if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
+    {
+      // display mq2 readings on whole screen
+      display.clearDisplay();
+      display.setTextSize(2);
+      display.setTextColor(WHITE);
+      display.setCursor(0, 10);
+      display.println("MQ2 Sensor");
+      display.setCursor(0, 30);
+      display.println("Dig: ");
+      display.setCursor(60, 30);
+      display.println(gassensorDigital);
+      // set cursor in new line
+      display.setCursor(0, 50);
+      display.println("Ana: ");
+      display.setCursor(60, 50);
+      display.println(gassensorAnalog);
+      display.display();
+      lastDisplayUpdate = currentMillis;
+    }
+      break;
+    case 2:
+      if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
+      {
+        // display sgp30 readings on whole screen
+        display.clearDisplay();
+        display.setTextSize(2);
+        display.setTextColor(WHITE);
+        display.setCursor(0, 10);
+        display.println("SGP30:");
+        display.setCursor(0, 30);
+        display.println("TVOC: ");
+        display.setCursor(60, 30);
+        display.println(TVOC);
+        // set cursor in new line
+        display.setCursor(0, 50);
+        display.println("eCO2: ");
+        display.setCursor(60, 50);
+        display.println(eCO2);
+        display.display();
+        lastDisplayUpdate = currentMillis;
+      }
+        break;
 
-    // Update the display
-    display.display();
-
-    lastDisplayUpdate = currentMillis;
-  }
-
-
+      default:
+        // display whole white screen
+        display.clearDisplay();
+        display.setTextSize(2);
+        display.setCursor(0, 0);
+        display.println("Encoder:");
+        display.setTextSize(3);
+        display.setCursor(50, 40);
+        display.println(newPosition / 2);
+        display.display();
+        break;
+      }
 }
