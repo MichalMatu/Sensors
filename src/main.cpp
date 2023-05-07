@@ -22,10 +22,6 @@ Adafruit_SGP30 sgp;
 // Initialize the encoder
 ESP32Encoder encoder;
 
-long lastPosition = 0;
-long newPosition = 0;
-int delta = 0;
-
 int TVOC_SET;
 int eCO2_SET;
 
@@ -50,14 +46,14 @@ void setup()
 
 void loop()
 {
-  newPosition = encoder.getCount();
-  delta = newPosition - lastPosition;
+  long newPosition = encoder.getCount();
 
   if (digitalRead(SW_PIN) == LOW)
   {
     menu++;
     delay(200);
   }
+
 
   if (menu > 3)
   {
@@ -66,19 +62,12 @@ void loop()
 
   if (menu == 1)
   {
-    if (delta != 0)
-    {
-      // Do something with delta
-      // For example, increment TVOC_SET by delta
-      TVOC_SET += delta;
-      // Update lastPosition to current position
-      lastPosition = newPosition;
-    }
+    TVOC_SET = newPosition + 50;
   }
 
   if (menu == 2)
   {
-    eCO2_SET = newPosition + 500;
+    eCO2_SET = newPosition + 50;
   }
 
   unsigned long currentMillis = millis();
