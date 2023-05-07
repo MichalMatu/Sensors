@@ -19,6 +19,8 @@ Adafruit_SGP30 sgp;
 #define DT_PIN 27
 #define SW_PIN 25
 
+const int RELAY_PIN = 5; // set the pin for the relay
+
 // Initialize the encoder
 ESP32Encoder encoder;
 
@@ -39,6 +41,8 @@ void setup()
   pinMode(CLK_PIN, INPUT);
   pinMode(DT_PIN, INPUT);
   pinMode(SW_PIN, INPUT_PULLUP);
+
+  pinMode(RELAY_PIN, OUTPUT); // set the relay pin as an output
 
   encoder.attachHalfQuad(CLK_PIN, DT_PIN);
 
@@ -90,6 +94,8 @@ void loop()
       lastPosition = newPosition;
     }
   }
+  Serial.println("eCO2_SET = " + String(eCO2_SET));
+  Serial.println("TVOC_SET = " + String(TVOC_SET));
 
   unsigned long currentMillis = millis();
   // reset currentMillis to 0 after 30 days
