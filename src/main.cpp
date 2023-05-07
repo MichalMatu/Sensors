@@ -64,9 +64,14 @@ void loop()
 
   long newPosition = encoder.getCount();
 
-  if (digitalRead(SW_PIN) == LOW)
+  // if (digitalRead(SW_PIN) == LOW)
+  // {
+  //   encoder.setCount(0); // Reset the encoder position
+  // }
+  // if enw position is greater than 8 or lower than -2 set to 0
+  if (newPosition > 8 || newPosition < -2)
   {
-    encoder.setCount(0); // Reset the encoder position
+    encoder.setCount(0);
   }
 
   unsigned long currentMillis = millis();
