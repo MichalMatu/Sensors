@@ -3,8 +3,14 @@
 #include <Adafruit_SSD1306.h>
 #include "Adafruit_SGP30.h"
 #include <ESP32Encoder.h>
+
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
+#define CLK_PIN 26       // Define the encoder pins
+#define DT_PIN 27        // Define the encoder pins
+#define SW_PIN 25        // Define the encoder pins
+
+const int RELAY_PIN = 5; // set the pin for the relay
 
 unsigned long lastDisplayUpdate = 0;
 unsigned long relay_update = 0;
@@ -15,13 +21,6 @@ const unsigned long relay_time = 5000;
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 Adafruit_SGP30 sgp;
-
-// Define the encoder pins
-#define CLK_PIN 26
-#define DT_PIN 27
-#define SW_PIN 25
-
-const int RELAY_PIN = 5; // set the pin for the relay
 
 // Initialize the encoder
 ESP32Encoder encoder;
