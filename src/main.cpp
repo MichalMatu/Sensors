@@ -22,6 +22,9 @@ Adafruit_SGP30 sgp;
 // Initialize the encoder
 ESP32Encoder encoder;
 
+int TVOC_SET = 0;
+int eCO2_SET = 0;
+
 void setup()
 {
   Serial.begin(115200);
@@ -34,20 +37,9 @@ void setup()
 
   // Set the initial position of the encoder
   encoder.setCount(0);
-
-  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C))
-  { // Address 0x3D for 128x64
-    Serial.println(F("SSD1306 allocation failed"));
-    for (;;)
-      ;
-  }
-
-  if (!sgp.begin())
-  {
-    Serial.println("Nie udało się uruchomić sensora SGP30. Sprawdź połączenie.");
-    while (1)
-      ;
-  }
+  // initialize display and sgp30 sensor and encoder
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  sgp.begin();
 }
 
 void loop()
@@ -60,7 +52,7 @@ void loop()
   // }
 
   // if enw position is greater than 8 or lower than -2 set to 0
-  if (newPosition > 8 || newPosition < -2)
+  if (newPosition > 4 || newPosition < -2)
   {
     encoder.setCount(0);
   }
@@ -78,6 +70,12 @@ void loop()
 
   switch (newPosition / 2)
   {
+  case -1:
+    // display black screen to save power
+    display.clearDisplay();
+    display.display();
+    break;
+
   case 0:
     if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
     {
@@ -99,11 +97,6 @@ void loop()
       display.println("SGP30 eCO2: ");
       display.setCursor(75, 30);
       display.println(eCO2);
-      // set cursor to new line and display encoder newposition
-      display.setCursor(0, 40);
-      display.println("Encoder: ");
-      display.setCursor(60, 40);
-      display.println(newPosition / 2);
       // convert currentmilis to second and display it
       display.setCursor(0, 50);
       display.println("RUN FOR: ");
@@ -138,17 +131,28 @@ void loop()
       lastDisplayUpdate = currentMillis;
     }
     break;
+  case 2:
+    // display set up alarm point:
+    if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
+    {
+      display.clearDisplay();
+      display.setTextSize(1);
+      display.setTextColor(WHITE);
+      display.setCursor(0, 10);
+      display.println("SET UP ALARM POINT:");
+      display.setCursor(0, 30);
+      display.println("TVOC: ");
+      display.setCursor(60, 30);
+      display.println(TVOC_SET);
+      // set cursor in new line
+      display.setCursor(0, 50);
+      display.println("eCO2: ");
+      display.setCursor(60, 50);
+      display.println(eCO2_SET);
+      display.display();
+      lastDisplayUpdate = currentMillis;
+    }
 
-  default:
-    // display whole white screen
-    display.clearDisplay();
-    display.setTextSize(2);
-    display.setCursor(0, 0);
-    display.println("Encoder:");
-    display.setTextSize(3);
-    display.setCursor(50, 40);
-    display.println(newPosition / 2);
-    display.display();
     break;
   }
 }
