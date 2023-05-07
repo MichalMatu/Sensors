@@ -22,8 +22,14 @@ Adafruit_SGP30 sgp;
 // Initialize the encoder
 ESP32Encoder encoder;
 
-int TVOC_SET = 0;
-int eCO2_SET = 0;
+long lastPosition = 0;
+long newPosition = 0;
+int delta = 0;
+
+int TVOC_SET;
+int eCO2_SET;
+
+int menu = 0;
 
 void setup()
 {
@@ -44,17 +50,35 @@ void setup()
 
 void loop()
 {
-  long newPosition = encoder.getCount();
+  newPosition = encoder.getCount();
+  delta = newPosition - lastPosition;
 
-  // if (digitalRead(SW_PIN) == LOW)
-  // {
-  //   encoder.setCount(0); // Reset the encoder position
-  // }
-
-  // if enw position is greater than 8 or lower than -2 set to 0
-  if (newPosition > 4 || newPosition < -2)
+  if (digitalRead(SW_PIN) == LOW)
   {
-    encoder.setCount(0);
+    menu++;
+    delay(200);
+  }
+
+  if (menu > 3)
+  {
+    menu = 0;
+  }
+
+  if (menu == 1)
+  {
+    if (delta != 0)
+    {
+      // Do something with delta
+      // For example, increment TVOC_SET by delta
+      TVOC_SET += delta;
+      // Update lastPosition to current position
+      lastPosition = newPosition;
+    }
+  }
+
+  if (menu == 2)
+  {
+    eCO2_SET = newPosition + 500;
   }
 
   unsigned long currentMillis = millis();
@@ -68,48 +92,9 @@ void loop()
   int TVOC = sgp.TVOC;
   int eCO2 = sgp.eCO2;
 
-  switch (newPosition / 2)
+  switch (menu)
   {
-  case -1:
-    // display black screen to save power
-    display.clearDisplay();
-    display.display();
-    break;
-
   case 0:
-    if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
-    {
-      // Clear the display
-      display.clearDisplay();
-
-      // Set the text size to 1
-      display.setTextSize(1);
-
-      // Set the text color to white
-      display.setTextColor(WHITE);
-
-      // Display SGP30 measurements
-      display.setCursor(0, 20);
-      display.println("SGP30 TVOC: ");
-      display.setCursor(75, 20);
-      display.println(TVOC);
-      display.setCursor(0, 30);
-      display.println("SGP30 eCO2: ");
-      display.setCursor(75, 30);
-      display.println(eCO2);
-      // convert currentmilis to second and display it
-      display.setCursor(0, 50);
-      display.println("RUN FOR: ");
-      display.setCursor(70, 50);
-      display.println(currentMillis / 1000);
-      // Update the display
-      display.display();
-
-      lastDisplayUpdate = currentMillis;
-    }
-    break;
-
-  case 1:
     if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
     {
       // display sgp30 readings on whole screen
@@ -118,6 +103,10 @@ void loop()
       display.setTextColor(WHITE);
       display.setCursor(0, 10);
       display.println("SGP30:");
+      display.setTextSize(1);
+      display.setCursor(100, 10);
+      display.println(currentMillis / 60000);
+      display.setTextSize(2);
       display.setCursor(0, 30);
       display.println("TVOC: ");
       display.setCursor(60, 30);
@@ -127,6 +116,24 @@ void loop()
       display.println("eCO2: ");
       display.setCursor(60, 50);
       display.println(eCO2);
+      display.display();
+      lastDisplayUpdate = currentMillis;
+    }
+    break;
+  case 1:
+    // display set up alarm point:
+    if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
+    {
+      display.clearDisplay();
+      display.setTextSize(1);
+      display.setTextColor(WHITE);
+      display.setCursor(0, 10);
+      display.println("SET UP ALARM POINT:");
+      display.setCursor(0, 30);
+      display.println("TVOC: ");
+      display.setCursor(60, 40);
+      display.setTextSize(3);
+      display.println(TVOC_SET);
       display.display();
       lastDisplayUpdate = currentMillis;
     }
@@ -140,19 +147,21 @@ void loop()
       display.setTextColor(WHITE);
       display.setCursor(0, 10);
       display.println("SET UP ALARM POINT:");
-      display.setCursor(0, 30);
-      display.println("TVOC: ");
-      display.setCursor(60, 30);
-      display.println(TVOC_SET);
       // set cursor in new line
       display.setCursor(0, 50);
       display.println("eCO2: ");
-      display.setCursor(60, 50);
+      display.setCursor(60, 40);
+      display.setTextSize(3);
       display.println(eCO2_SET);
       display.display();
       lastDisplayUpdate = currentMillis;
     }
+    break;
 
+  case 3:
+    // display black screen to save power
+    display.clearDisplay();
+    display.display();
     break;
   }
 }
