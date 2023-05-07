@@ -117,7 +117,7 @@ void loop()
       display.println("SET UP ALARM POINT:");
       display.setCursor(0, 30);
       display.println("TVOC: ");
-      display.setCursor(60, 40);
+      display.setCursor(50, 40);
       display.setTextSize(3);
       display.println(TVOC_SET);
       display.display();
@@ -125,7 +125,7 @@ void loop()
     }
     break;
   case 2:
-    eCO2_SET += delta;
+    eCO2_SET += delta * 10;
     // display set up alarm point:
     if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
     {
@@ -137,7 +137,7 @@ void loop()
       // set cursor in new line
       display.setCursor(0, 50);
       display.println("eCO2: ");
-      display.setCursor(60, 40);
+      display.setCursor(50, 40);
       display.setTextSize(3);
       display.println(eCO2_SET);
       display.display();
