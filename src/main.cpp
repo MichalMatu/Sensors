@@ -63,6 +63,12 @@ void loop()
     menu = 0;
   }
 
+  // if menu is 0 swich off encoder.getcount
+  if (menu == 0)
+  {
+    encoder.setCount(0);
+  }
+
   if (menu == 1)
   {
     delta = newPosition - lastPosition;
