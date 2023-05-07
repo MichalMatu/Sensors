@@ -11,7 +11,6 @@ const unsigned long displayUpdateInterval = 100;
 unsigned long set_time = 0;
 unsigned long current_time = 0;
 
-
 // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
@@ -188,7 +187,7 @@ void loop()
     }
     break;
   case 3:
-    current_time = currentMillis / 60000 + set_time;
+    current_time = (currentMillis / 60000 + set_time) % 1440;
 
     if (newPosition / 2 == 3)
     {
@@ -215,8 +214,6 @@ void loop()
       display.print(current_time % 60); // Display minutes
       display.display();
     }
-    break;
-
     break;
 
   default:
