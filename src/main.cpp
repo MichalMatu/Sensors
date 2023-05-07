@@ -7,7 +7,9 @@
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
 unsigned long lastDisplayUpdate = 0;
+unsigned long relay_update = 0;
 const unsigned long displayUpdateInterval = 100;
+const unsigned long relay_time = 5000;
 
 // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
@@ -56,46 +58,13 @@ void setup()
 void loop()
 {
   newPosition = encoder.getCount();
-
+  delta = newPosition - lastPosition;
+  lastPosition = newPosition;
   if (digitalRead(SW_PIN) == LOW)
   {
     menu++;
     delay(200);
   }
-  if (menu > 3)
-  {
-    menu = 0;
-  }
-
-  // if menu is 0 swich off encoder.getcount
-  if (menu == 0)
-  {
-    encoder.setCount(0);
-  }
-
-  if (menu == 1)
-  {
-    delta = newPosition - lastPosition;
-    if (delta != 0)
-    {
-      TVOC_SET += delta;
-      // Update lastPosition to current position
-      lastPosition = newPosition;
-    }
-  }
-
-  if (menu == 2)
-  {
-    delta1 = newPosition - lastPosition;
-    if (delta1 != 0)
-    {
-      eCO2_SET += delta1;
-      // Update lastPosition to current position
-      lastPosition = newPosition;
-    }
-  }
-  Serial.println("eCO2_SET = " + String(eCO2_SET));
-  Serial.println("TVOC_SET = " + String(TVOC_SET));
 
   unsigned long currentMillis = millis();
   // reset currentMillis to 0 after 30 days
@@ -137,6 +106,7 @@ void loop()
     }
     break;
   case 1:
+    TVOC_SET += delta;
     // display set up alarm point:
     if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
     {
@@ -155,6 +125,7 @@ void loop()
     }
     break;
   case 2:
+    eCO2_SET += delta;
     // display set up alarm point:
     if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
     {
@@ -179,5 +150,22 @@ void loop()
     display.clearDisplay();
     display.display();
     break;
+  default:
+    menu = 0;
+    break;
+  }
+
+  if ((eCO2 > eCO2_SET || TVOC > TVOC_SET) && (currentMillis - relay_update >= relay_time))
+  {
+    digitalWrite(RELAY_PIN, HIGH);
+    relay_update = currentMillis;
+  }
+  else if (currentMillis - relay_update < relay_time)
+  {
+    digitalWrite(RELAY_PIN, HIGH);
+  }
+  else
+  {
+    digitalWrite(RELAY_PIN, LOW);
   }
 }
