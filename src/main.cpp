@@ -8,6 +8,9 @@
 
 unsigned long lastDisplayUpdate = 0;
 const unsigned long displayUpdateInterval = 100;
+unsigned long set_time = 0;
+unsigned long current_time = 0;
+
 
 // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
@@ -68,6 +71,7 @@ void loop()
   // {
   //   encoder.setCount(0); // Reset the encoder position
   // }
+
   // if enw position is greater than 8 or lower than -2 set to 0
   if (newPosition > 8 || newPosition < -2)
   {
@@ -160,40 +164,71 @@ void loop()
       display.display();
       lastDisplayUpdate = currentMillis;
     }
-      break;
-    case 2:
-      if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
-      {
-        // display sgp30 readings on whole screen
-        display.clearDisplay();
-        display.setTextSize(2);
-        display.setTextColor(WHITE);
-        display.setCursor(0, 10);
-        display.println("SGP30:");
-        display.setCursor(0, 30);
-        display.println("TVOC: ");
-        display.setCursor(60, 30);
-        display.println(TVOC);
-        // set cursor in new line
-        display.setCursor(0, 50);
-        display.println("eCO2: ");
-        display.setCursor(60, 50);
-        display.println(eCO2);
-        display.display();
-        lastDisplayUpdate = currentMillis;
-      }
-        break;
+    break;
+  case 2:
+    if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
+    {
+      // display sgp30 readings on whole screen
+      display.clearDisplay();
+      display.setTextSize(2);
+      display.setTextColor(WHITE);
+      display.setCursor(0, 10);
+      display.println("SGP30:");
+      display.setCursor(0, 30);
+      display.println("TVOC: ");
+      display.setCursor(60, 30);
+      display.println(TVOC);
+      // set cursor in new line
+      display.setCursor(0, 50);
+      display.println("eCO2: ");
+      display.setCursor(60, 50);
+      display.println(eCO2);
+      display.display();
+      lastDisplayUpdate = currentMillis;
+    }
+    break;
+  case 3:
+    current_time = currentMillis / 60000 + set_time;
 
-      default:
-        // display whole white screen
-        display.clearDisplay();
-        display.setTextSize(2);
-        display.setCursor(0, 0);
-        display.println("Encoder:");
-        display.setTextSize(3);
-        display.setCursor(50, 40);
-        display.println(newPosition / 2);
-        display.display();
-        break;
+    if (newPosition / 2 == 3)
+    {
+      if (digitalRead(SW_PIN) == LOW)
+      {
+        set_time = set_time + 1;
       }
+    }
+    if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
+    {
+      // display current time
+      display.clearDisplay();
+      display.setTextSize(2);
+      display.setTextColor(WHITE);
+      display.setCursor(0, 10);
+      display.println("Time:");
+      display.setCursor(0, 30);
+      display.print(current_time / 60); // Display hours
+      display.print(":");
+      if ((current_time % 60) < 10) // Display leading zero for minutes < 10
+      {
+        display.print("0");
+      }
+      display.print(current_time % 60); // Display minutes
+      display.display();
+    }
+    break;
+
+    break;
+
+  default:
+    // display whole white screen
+    display.clearDisplay();
+    display.setTextSize(2);
+    display.setCursor(0, 0);
+    display.println("Encoder:");
+    display.setTextSize(3);
+    display.setCursor(50, 40);
+    display.println(newPosition / 2);
+    display.display();
+    break;
+  }
 }
