@@ -2,26 +2,17 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include "Adafruit_SGP30.h"
-#include <esp32-hal.h>
-
+#include <ESP32Encoder.h>
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
 unsigned long lastDisplayUpdate = 0;
 const unsigned long displayUpdateInterval = 100;
-unsigned long set_time = 0;
-unsigned long current_time = 0;
 
 // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
-int Gas_analog = 4;  // used for ESP32
-int Gas_digital = 2; // used for ESP32
-
 Adafruit_SGP30 sgp;
-
-// Include the ESP32 encoder library
-#include <ESP32Encoder.h>
 
 // Define the encoder pins
 #define CLK_PIN 26
@@ -50,9 +41,6 @@ void setup()
     for (;;)
       ;
   }
-  delay(2000);
-
-  pinMode(Gas_digital, INPUT);
 
   if (!sgp.begin())
   {
@@ -64,8 +52,6 @@ void setup()
 
 void loop()
 {
-  int temperature = temperatureRead(); // Read the ESP32 temperature in Celsius
-
   long newPosition = encoder.getCount();
 
   // if (digitalRead(SW_PIN) == LOW)
@@ -86,9 +72,6 @@ void loop()
     currentMillis = 0;
   }
 
-  int gassensorAnalog = analogRead(Gas_analog);
-  int gassensorDigital = digitalRead(Gas_digital);
-
   sgp.IAQmeasure();
   int TVOC = sgp.TVOC;
   int eCO2 = sgp.eCO2;
@@ -107,17 +90,6 @@ void loop()
       // Set the text color to white
       display.setTextColor(WHITE);
 
-      // Set the cursor position to (0, 10)
-      display.setCursor(0, 10);
-      display.println("MQ2 D: ");
-      display.setCursor(35, 10);
-      display.println(gassensorDigital);
-      // set cursor in new line
-      display.setCursor(45, 10);
-      display.println("A: ");
-      display.setCursor(60, 10);
-      display.println(gassensorAnalog);
-
       // Display SGP30 measurements
       display.setCursor(0, 20);
       display.println("SGP30 TVOC: ");
@@ -134,44 +106,17 @@ void loop()
       display.println(newPosition / 2);
       // convert currentmilis to second and display it
       display.setCursor(0, 50);
-      display.println("RUN: ");
-      display.setCursor(40, 50);
+      display.println("RUN FOR: ");
+      display.setCursor(70, 50);
       display.println(currentMillis / 1000);
-      // display internal esp32 temperature
-      display.setCursor(65, 50);
-      display.println("T: ");
-      display.setCursor(90, 50);
-      display.println(temperature);
-
       // Update the display
       display.display();
 
       lastDisplayUpdate = currentMillis;
     }
     break;
+
   case 1:
-    if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
-    {
-      // display mq2 readings on whole screen
-      display.clearDisplay();
-      display.setTextSize(2);
-      display.setTextColor(WHITE);
-      display.setCursor(0, 10);
-      display.println("MQ2 Sensor");
-      display.setCursor(0, 30);
-      display.println("Dig: ");
-      display.setCursor(60, 30);
-      display.println(gassensorDigital);
-      // set cursor in new line
-      display.setCursor(0, 50);
-      display.println("Ana: ");
-      display.setCursor(60, 50);
-      display.println(gassensorAnalog);
-      display.display();
-      lastDisplayUpdate = currentMillis;
-    }
-    break;
-  case 2:
     if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
     {
       // display sgp30 readings on whole screen
@@ -189,50 +134,6 @@ void loop()
       display.println("eCO2: ");
       display.setCursor(60, 50);
       display.println(eCO2);
-      display.display();
-      lastDisplayUpdate = currentMillis;
-    }
-    break;
-  case 3:
-    current_time = (currentMillis / 60000 + set_time) % 1440;
-
-    if (newPosition / 2 == 3)
-    {
-      if (digitalRead(SW_PIN) == LOW)
-      {
-        set_time = set_time + 1;
-      }
-    }
-    if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
-    {
-      // display current time
-      display.clearDisplay();
-      display.setTextSize(2);
-      display.setTextColor(WHITE);
-      display.setCursor(0, 10);
-      display.println("Time:");
-      display.setCursor(0, 30);
-      display.print(current_time / 60); // Display hours
-      display.print(":");
-      if ((current_time % 60) < 10) // Display leading zero for minutes < 10
-      {
-        display.print("0");
-      }
-      display.print(current_time % 60); // Display minutes
-      display.display();
-    }
-    break;
-  case 4:
-  // display internal esp32 temperature
-    if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
-    {
-      display.clearDisplay();
-      display.setTextSize(2);
-      display.setTextColor(WHITE);
-      display.setCursor(0, 10);
-      display.println("Temp:");
-      display.setCursor(0, 30);
-      display.println(temperature);
       display.display();
       lastDisplayUpdate = currentMillis;
     }
