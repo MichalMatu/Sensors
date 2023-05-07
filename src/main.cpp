@@ -2,6 +2,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include "Adafruit_SGP30.h"
+#include <esp32-hal.h>
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
@@ -63,6 +64,7 @@ void setup()
 
 void loop()
 {
+  int temperature = temperatureRead(); // Read the ESP32 temperature in Celsius
 
   long newPosition = encoder.getCount();
 
@@ -132,9 +134,14 @@ void loop()
       display.println(newPosition / 2);
       // convert currentmilis to second and display it
       display.setCursor(0, 50);
-      display.println("Millis: ");
-      display.setCursor(60, 50);
+      display.println("RUN: ");
+      display.setCursor(40, 50);
       display.println(currentMillis / 1000);
+      // display internal esp32 temperature
+      display.setCursor(65, 50);
+      display.println("T: ");
+      display.setCursor(90, 50);
+      display.println(temperature);
 
       // Update the display
       display.display();
@@ -213,6 +220,21 @@ void loop()
       }
       display.print(current_time % 60); // Display minutes
       display.display();
+    }
+    break;
+  case 4:
+  // display internal esp32 temperature
+    if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
+    {
+      display.clearDisplay();
+      display.setTextSize(2);
+      display.setTextColor(WHITE);
+      display.setCursor(0, 10);
+      display.println("Temp:");
+      display.setCursor(0, 30);
+      display.println(temperature);
+      display.display();
+      lastDisplayUpdate = currentMillis;
     }
     break;
 
