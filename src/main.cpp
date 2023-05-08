@@ -4,6 +4,9 @@
 #include "Adafruit_SGP30.h"
 #include <ESP32Encoder.h>
 
+#include <Preferences.h>
+Preferences preferences;
+
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 #define CLK_PIN 26       // Define the encoder pins
@@ -52,6 +55,9 @@ void setup()
   // initialize display and sgp30 sensor and encoder
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
   sgp.begin();
+  preferences.begin("my_app", false);
+  TVOC_SET = preferences.getInt("TVOC_SET", 50);
+  eCO2_SET = preferences.getInt("eCO2_SET", 500);
 }
 
 void loop()
@@ -152,6 +158,12 @@ void loop()
   default:
     menu = 0;
     break;
+  }
+
+  if (delta != 0 || delta1 != 0)
+  {
+    preferences.putInt("TVOC_SET", TVOC_SET);
+    preferences.putInt("eCO2_SET", eCO2_SET);
   }
 
   if ((eCO2 > eCO2_SET || TVOC > TVOC_SET) && (currentMillis - relay_update >= relay_time))
