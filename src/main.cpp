@@ -154,15 +154,15 @@ void loop()
     if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
     {
       display.clearDisplay();
-      display.setTextSize(1);
-      display.setTextColor(WHITE);
-      display.setCursor(0, 10);
-      display.println("TVOC GRAPH:");
-      display.setCursor(0, 30);
-      display.println("TVOC: ");
-      display.setCursor(50, 40);
-      display.setTextSize(3);
-      display.println(TVOC);
+    // display dot in each corner
+      display.drawPixel(0, 0, WHITE);
+      display.drawPixel(0, 63, WHITE);
+      display.drawPixel(127, 0, WHITE);
+      display.drawPixel(127, 63, WHITE);
+      // map eco2 to be between 0 and 63 now it can be between 400 and 2000
+      int eco2 = map(eCO2, 400, 2000, 63, 0);
+      // display lines using eco2 as hight on screen
+      display.drawLine(0, 63, 0, eco2, WHITE);
       display.display();
       lastDisplayUpdate = currentMillis;
     }
