@@ -149,8 +149,26 @@ void loop()
       lastDisplayUpdate = currentMillis;
     }
     break;
-
   case 3:
+  // display simply graph with TVOC 
+    if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
+    {
+      display.clearDisplay();
+      display.setTextSize(1);
+      display.setTextColor(WHITE);
+      display.setCursor(0, 10);
+      display.println("TVOC GRAPH:");
+      display.setCursor(0, 30);
+      display.println("TVOC: ");
+      display.setCursor(50, 40);
+      display.setTextSize(3);
+      display.println(TVOC);
+      display.display();
+      lastDisplayUpdate = currentMillis;
+    }
+  break;
+
+  case 4:
     // display black screen to save power
     display.clearDisplay();
     display.display();
