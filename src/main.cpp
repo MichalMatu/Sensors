@@ -64,7 +64,7 @@ void loop()
 {
   unsigned long currentMillis = millis();
 
-  newPosition = encoder.getCount();
+  newPosition = encoder.getCount() / 2;
   delta = newPosition - lastPosition;
   lastPosition = newPosition;
 
@@ -179,17 +179,49 @@ void loop()
     }
     break;
   case 4:
+    // if delta is less than 0 add 60 to set_time if it's bigger than 0 add 1 to set_time
+    if (delta < 0)
+    {
+      set_time += 60;
+    }
+    else if (delta > 0)
+    {
+      set_time += 1;
+    }
+
+    // declare hours and minutes variables
+    int day;
+    int hours;
+    int minutes;
+    // calculate hours and minutes, and limit their values to 24 and 60, respectively
+    hours = (currentMillis / 60000 + set_time) / 60 % 24;
+    minutes = (currentMillis / 60000 + set_time) % 60;
+    day = (currentMillis / 60000 + set_time) / 1440;
     // display time on screen
     if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
     {
       display.clearDisplay();
-      display.setTextSize(2);
+      display.setTextSize(1);
       display.setTextColor(WHITE);
       display.setCursor(0, 10);
       display.println("TIME:");
-      display.setTextSize(1);
-      display.setCursor(70, 40);
-      display.println(currentMillis / 60000 + set_time);
+      display.setCursor(0, 20);
+      display.println("DAY:");
+      display.setCursor(30, 20);
+      display.println(day);
+      display.setTextSize(3);
+      display.setCursor(20, 40);
+      if (hours < 10)
+      {
+        display.print("0");
+      }
+      display.print(hours);
+      display.print(":");
+      if (minutes < 10)
+      {
+        display.print("0");
+      }
+      display.print(minutes);
       display.display();
       lastDisplayUpdate = currentMillis;
     }
