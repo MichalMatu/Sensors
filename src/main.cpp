@@ -62,20 +62,16 @@ void setup()
 
 void loop()
 {
+  unsigned long currentMillis = millis();
+
   newPosition = encoder.getCount();
   delta = newPosition - lastPosition;
   lastPosition = newPosition;
+
   if (digitalRead(SW_PIN) == LOW)
   {
     menu++;
     delay(200);
-  }
-
-  unsigned long currentMillis = millis();
-  // reset currentMillis to 0 after 30 days
-  if (currentMillis > 2592000000)
-  {
-    currentMillis = 0;
   }
 
   sgp.IAQmeasure();
