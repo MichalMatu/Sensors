@@ -17,6 +17,7 @@ const int RELAY_PIN = 5; // set the pin for the relay
 
 unsigned long lastDisplayUpdate = 0;
 unsigned long relay_update = 0;
+unsigned long set_time = 0;
 const unsigned long displayUpdateInterval = 100;
 const unsigned long relay_time = 5000;
 
@@ -178,8 +179,25 @@ void loop()
       lastDisplayUpdate = currentMillis;
     }
     break;
-
   case 4:
+    // display time on screen
+    if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
+    {
+      display.clearDisplay();
+      display.setTextSize(2);
+      display.setTextColor(WHITE);
+      display.setCursor(0, 10);
+      display.println("TIME:");
+      display.setTextSize(1);
+      display.setCursor(70, 40);
+      display.println(currentMillis / 60000 + set_time);
+      display.display();
+      lastDisplayUpdate = currentMillis;
+    }
+
+    break;
+
+  case 5:
     // display black screen to save power
     display.clearDisplay();
     display.display();
