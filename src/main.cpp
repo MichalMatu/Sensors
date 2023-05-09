@@ -150,23 +150,38 @@ void loop()
     }
     break;
   case 3:
-  // display simply graph with TVOC 
+    // display simply graph with TVOC
     if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
     {
       display.clearDisplay();
-    // display dot in each corner
-      display.drawPixel(0, 0, WHITE);
-      display.drawPixel(0, 63, WHITE);
-      display.drawPixel(127, 0, WHITE);
-      display.drawPixel(127, 63, WHITE);
-      // map eco2 to be between 0 and 63 now it can be between 400 and 2000
-      int eco2 = map(eCO2, 400, 2000, 63, 0);
-      // display lines using eco2 as hight on screen
-      display.drawLine(0, 63, 0, eco2, WHITE);
+      // display TVOC
+      display.setTextSize(1);
+      display.setTextColor(WHITE);
+      display.setCursor(20, 0);
+      display.println("TVOC");
+      // display eCO2
+      display.setCursor(80, 0);
+      display.println("eCO2");
+      // map TVOC 0 - 400 to be in range from 10 to 50
+      int TVOC_graph = map(TVOC, 0, 400, 5, 50);
+      // map eCO2 400 - 2000 to be in range from 10 to 50
+      int eCO2_graph = map(eCO2, 400, 4000, 5, 50);
+      // display TVOC_graph
+      display.fillRect(10, 63 - TVOC_graph, 45, TVOC_graph, WHITE);
+      // display eCO2_graph
+      display.fillRect(70, 63 - eCO2_graph, 48, eCO2_graph, WHITE);
+      // map tvoc_set to draw horizontal line on screen
+      int TVOC_set_graph = map(TVOC_SET, 0, 400, 5, 50);
+      // map eCO2_set to draw horizontal line on screen
+      int eCO2_set_graph = map(eCO2_SET, 400, 4000, 5, 50);
+      // draw horizontal line on screen on first half of screen with tvoc_set_graph
+      display.drawLine(10, 63 - TVOC_set_graph, 54, 63 - TVOC_set_graph, WHITE);
+      // draw horizontal line on screen on second half of screen with eCO2_set_graph
+      display.drawLine(70, 63 - eCO2_set_graph, 117, 63 - eCO2_set_graph, WHITE);
       display.display();
       lastDisplayUpdate = currentMillis;
     }
-  break;
+    break;
 
   case 4:
     // display black screen to save power
