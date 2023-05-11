@@ -72,6 +72,9 @@ void setup()
 
 void loop()
 {
+  // check what core is being used
+  Serial.print("loop() running on core ");
+  Serial.println(xPortGetCoreID());
   unsigned long currentMillis = millis();
 
   newPosition = encoder.getCount() / 2;
