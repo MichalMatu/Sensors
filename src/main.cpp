@@ -87,106 +87,94 @@ void loop()
   sgp.IAQmeasure();
   int TVOC = sgp.TVOC;
   int eCO2 = sgp.eCO2;
+  if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
+  {
+    display.display();
+    lastDisplayUpdate = currentMillis;
+  }
+
+  // map TVOC 0 - 400 to be in range from 10 to 50
+  int TVOC_graph = map(TVOC, 0, 400, 5, 50);
+  // map eCO2 400 - 2000 to be in range from 10 to 50
+  int eCO2_graph = map(eCO2, 400, 4000, 5, 50);
+  // map tvoc_set to draw horizontal line on screen
+  int TVOC_set_graph = map(TVOC_SET, 0, 400, 5, 50);
+  // map eCO2_set to draw horizontal line on screen
+  int eCO2_set_graph = map(eCO2_SET, 400, 4000, 5, 50);
 
   switch (menu)
   {
   case 0:
-    if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
-    {
-      // display sgp30 readings on whole screen
-      display.clearDisplay();
-      display.setTextSize(2);
-      display.setTextColor(WHITE);
-      display.setCursor(0, 10);
-      display.println("SGP30:");
-      display.setTextSize(1);
-      display.setCursor(100, 10);
-      display.println(currentMillis / 60000);
-      display.setTextSize(2);
-      display.setCursor(0, 30);
-      display.println("TVOC: ");
-      display.setCursor(60, 30);
-      display.println(TVOC);
-      // set cursor in new line
-      display.setCursor(0, 50);
-      display.println("eCO2: ");
-      display.setCursor(60, 50);
-      display.println(eCO2);
-      display.display();
-      lastDisplayUpdate = currentMillis;
-    }
+
+    // display sgp30 readings on whole screen
+    display.clearDisplay();
+    display.setTextSize(2);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 10);
+    display.println("SGP30:");
+    display.setTextSize(1);
+    display.setCursor(100, 10);
+    display.println(currentMillis / 60000);
+    display.setTextSize(2);
+    display.setCursor(0, 30);
+    display.println("TVOC: ");
+    display.setCursor(60, 30);
+    display.println(TVOC);
+    // set cursor in new line
+    display.setCursor(0, 50);
+    display.println("eCO2: ");
+    display.setCursor(60, 50);
+    display.println(eCO2);
     break;
   case 1:
     TVOC_SET += delta;
     // display set up alarm point:
-    if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
-    {
-      display.clearDisplay();
-      display.setTextSize(1);
-      display.setTextColor(WHITE);
-      display.setCursor(0, 10);
-      display.println("SET UP ALARM POINT:");
-      display.setCursor(0, 30);
-      display.println("TVOC: ");
-      display.setCursor(50, 40);
-      display.setTextSize(3);
-      display.println(TVOC_SET);
-      display.display();
-      lastDisplayUpdate = currentMillis;
-    }
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 10);
+    display.println("SET UP ALARM POINT:");
+    display.setCursor(0, 30);
+    display.println("TVOC: ");
+    display.setCursor(50, 40);
+    display.setTextSize(3);
+    display.println(TVOC_SET);
     break;
   case 2:
     eCO2_SET += delta * 10;
     // display set up alarm point:
-    if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
-    {
-      display.clearDisplay();
-      display.setTextSize(1);
-      display.setTextColor(WHITE);
-      display.setCursor(0, 10);
-      display.println("SET UP ALARM POINT:");
-      // set cursor in new line
-      display.setCursor(0, 50);
-      display.println("eCO2: ");
-      display.setCursor(50, 40);
-      display.setTextSize(3);
-      display.println(eCO2_SET);
-      display.display();
-      lastDisplayUpdate = currentMillis;
-    }
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 10);
+    display.println("SET UP ALARM POINT:");
+    // set cursor in new line
+    display.setCursor(0, 50);
+    display.println("eCO2: ");
+    display.setCursor(50, 40);
+    display.setTextSize(3);
+    display.println(eCO2_SET);
     break;
   case 3:
     // display simply graph with TVOC
-    if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
-    {
-      display.clearDisplay();
-      // display TVOC
-      display.setTextSize(1);
-      display.setTextColor(WHITE);
-      display.setCursor(20, 0);
-      display.println("TVOC");
-      // display eCO2
-      display.setCursor(80, 0);
-      display.println("eCO2");
-      // map TVOC 0 - 400 to be in range from 10 to 50
-      int TVOC_graph = map(TVOC, 0, 400, 5, 50);
-      // map eCO2 400 - 2000 to be in range from 10 to 50
-      int eCO2_graph = map(eCO2, 400, 4000, 5, 50);
-      // display TVOC_graph
-      display.fillRect(10, 63 - TVOC_graph, 45, TVOC_graph, WHITE);
-      // display eCO2_graph
-      display.fillRect(70, 63 - eCO2_graph, 48, eCO2_graph, WHITE);
-      // map tvoc_set to draw horizontal line on screen
-      int TVOC_set_graph = map(TVOC_SET, 0, 400, 5, 50);
-      // map eCO2_set to draw horizontal line on screen
-      int eCO2_set_graph = map(eCO2_SET, 400, 4000, 5, 50);
-      // draw horizontal line on screen on first half of screen with tvoc_set_graph
-      display.drawLine(10, 63 - TVOC_set_graph, 54, 63 - TVOC_set_graph, WHITE);
-      // draw horizontal line on screen on second half of screen with eCO2_set_graph
-      display.drawLine(70, 63 - eCO2_set_graph, 117, 63 - eCO2_set_graph, WHITE);
-      display.display();
-      lastDisplayUpdate = currentMillis;
-    }
+    display.clearDisplay();
+    // display TVOC
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(20, 0);
+    display.println("TVOC");
+    // display eCO2
+    display.setCursor(80, 0);
+    display.println("eCO2");
+    // display TVOC_graph
+    display.fillRect(10, 63 - TVOC_graph, 45, TVOC_graph, WHITE);
+    // display eCO2_graph
+    display.fillRect(70, 63 - eCO2_graph, 48, eCO2_graph, WHITE);
+
+    // draw horizontal line on screen on first half of screen with tvoc_set_graph
+    display.drawLine(10, 63 - TVOC_set_graph, 54, 63 - TVOC_set_graph, WHITE);
+    // draw horizontal line on screen on second half of screen with eCO2_set_graph
+    display.drawLine(70, 63 - eCO2_set_graph, 117, 63 - eCO2_set_graph, WHITE);
     break;
   case 4:
     // if delta is less than 0 add 60 to set_time if it's bigger than 0 add 1 to set_time
@@ -208,34 +196,28 @@ void loop()
     minutes = (currentMillis / 60000 + set_time) % 60;
     day = (currentMillis / 60000 + set_time) / 1440;
     // display time on screen
-    if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 10);
+    display.println("TIME:");
+    display.setCursor(0, 20);
+    display.println("DAY:");
+    display.setCursor(30, 20);
+    display.println(day);
+    display.setTextSize(3);
+    display.setCursor(20, 40);
+    if (hours < 10)
     {
-      display.clearDisplay();
-      display.setTextSize(1);
-      display.setTextColor(WHITE);
-      display.setCursor(0, 10);
-      display.println("TIME:");
-      display.setCursor(0, 20);
-      display.println("DAY:");
-      display.setCursor(30, 20);
-      display.println(day);
-      display.setTextSize(3);
-      display.setCursor(20, 40);
-      if (hours < 10)
-      {
-        display.print("0");
-      }
-      display.print(hours);
-      display.print(":");
-      if (minutes < 10)
-      {
-        display.print("0");
-      }
-      display.print(minutes);
-      display.display();
-      lastDisplayUpdate = currentMillis;
+      display.print("0");
     }
-
+    display.print(hours);
+    display.print(":");
+    if (minutes < 10)
+    {
+      display.print("0");
+    }
+    display.print(minutes);
     break;
   case 5:
     if (delta < 0)
@@ -246,8 +228,6 @@ void loop()
     {
       relay = relay ? false : true;
     }
-    if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
-    {
       display.clearDisplay();
       display.setTextSize(1);
       display.setTextColor(WHITE);
@@ -276,11 +256,6 @@ void loop()
       {
         display.println("OFF");
       }
-
-      display.display();
-      lastDisplayUpdate = currentMillis;
-    }
-
     break;
 
   case 6:
@@ -301,11 +276,13 @@ void loop()
 
   if (eCO2 > eCO2_SET || TVOC > TVOC_SET)
   {
-    if (relay){
-    digitalWrite(RELAY_PIN, LOW);
+    if (relay)
+    {
+      digitalWrite(RELAY_PIN, LOW);
     }
-    if(buzzer){
-    tone(buzzerPin, 1500);
+    if (buzzer)
+    {
+      tone(buzzerPin, 1500);
     }
     relay_update = currentMillis;
   }
