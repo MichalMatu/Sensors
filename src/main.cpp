@@ -301,8 +301,12 @@ void loop()
 
   if (eCO2 > eCO2_SET || TVOC > TVOC_SET)
   {
+    if (relay){
     digitalWrite(RELAY_PIN, LOW);
+    }
+    if(buzzer){
     tone(buzzerPin, 1500);
+    }
     relay_update = currentMillis;
   }
   else if (currentMillis - relay_update >= relay_time)
