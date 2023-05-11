@@ -13,9 +13,12 @@ Preferences preferences;
 #define DT_PIN 27        // Define the encoder pins
 #define SW_PIN 25        // Define the encoder pins
 
-const int buzzerPin = 18;
+const int buzzerPin = 18; // set the pin for the buzzer
+const int RELAY_PIN = 5;  // set the pin for the relay
 
-const int RELAY_PIN = 5; // set the pin for the relay
+// declare if relar or buzzer will be in use, set true by default
+bool buzzer = true;
+bool relay = true;
 
 unsigned long lastDisplayUpdate = 0;
 unsigned long relay_update = 0;
@@ -234,8 +237,53 @@ void loop()
     }
 
     break;
-
   case 5:
+    if (delta < 0)
+    {
+      buzzer = buzzer ? false : true;
+    }
+    else if (delta > 0)
+    {
+      relay = relay ? false : true;
+    }
+    if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
+    {
+      display.clearDisplay();
+      display.setTextSize(1);
+      display.setTextColor(WHITE);
+      display.setCursor(0, 10);
+      display.println("BUZZER:");
+      display.setCursor(50, 25);
+      display.setTextSize(2);
+      if (buzzer)
+      {
+        display.println("ON");
+      }
+      else
+      {
+        display.println("OFF");
+      }
+      display.setCursor(0, 40);
+      display.setTextSize(1);
+      display.println("RELAY:");
+      display.setCursor(50, 50);
+      display.setTextSize(2);
+      if (relay)
+      {
+        display.println("ON");
+      }
+      else
+      {
+        display.println("OFF");
+      }
+
+      display.display();
+      lastDisplayUpdate = currentMillis;
+    }
+
+    break;
+
+  case 6:
     // display black screen to save power
     display.clearDisplay();
     display.display();
