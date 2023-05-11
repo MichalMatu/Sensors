@@ -238,34 +238,34 @@ void loop()
     {
       relay = relay ? false : true;
     }
-      display.clearDisplay();
-      display.setTextSize(1);
-      display.setTextColor(WHITE);
-      display.setCursor(0, 10);
-      display.println("BUZZER:");
-      display.setCursor(50, 25);
-      display.setTextSize(2);
-      if (buzzer)
-      {
-        display.println("ON");
-      }
-      else
-      {
-        display.println("OFF");
-      }
-      display.setCursor(0, 40);
-      display.setTextSize(1);
-      display.println("RELAY:");
-      display.setCursor(50, 50);
-      display.setTextSize(2);
-      if (relay)
-      {
-        display.println("ON");
-      }
-      else
-      {
-        display.println("OFF");
-      }
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 10);
+    display.println("BUZZER:");
+    display.setCursor(50, 25);
+    display.setTextSize(2);
+    if (buzzer)
+    {
+      display.println("ON");
+    }
+    else
+    {
+      display.println("OFF");
+    }
+    display.setCursor(0, 40);
+    display.setTextSize(1);
+    display.println("RELAY:");
+    display.setCursor(50, 50);
+    display.setTextSize(2);
+    if (relay)
+    {
+      display.println("ON");
+    }
+    else
+    {
+      display.println("OFF");
+    }
     break;
 
   case 6:
@@ -310,17 +310,16 @@ void buzzer_task(void *pvParameters)
     // wait for a signal to play the melody
     ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
-    // play the melody
-    tone(buzzerPin, 1500);
-    delay(500);
-    noTone(buzzerPin);
-    delay(500);
-    tone(buzzerPin, 1500);
-    delay(500);
-    noTone(buzzerPin);
-    delay(500);
-    tone(buzzerPin, 1500);
-    delay(500);
+    const int melody[] = {659, 659, 659, 523, 659, 784, 392, 523, 392, 330, 440, 494, 466, 440, 392, 659, 784, 880, 698, 784, 659, 523, 587, 494, 523, 392, 330, 440, 494, 466, 440, 392};
+
+    const int noteDuration[] = {250, 250, 250, 250, 250, 250, 500, 250, 750, 250, 250, 250, 250, 250, 500, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 750, 250, 250, 250, 250, 500};
+
+    for (int i = 0; i < sizeof(melody) / sizeof(int); i++)
+    {
+      tone(buzzerPin, melody[i], noteDuration[i]);
+      delay(noteDuration[i] * 1.30);
+    }
     noTone(buzzerPin);
   }
 }
+
