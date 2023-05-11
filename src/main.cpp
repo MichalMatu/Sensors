@@ -7,6 +7,10 @@
 #include <Preferences.h>
 Preferences preferences;
 
+TaskHandle_t buzzerTask = NULL; // buzzer task handle
+
+void buzzer_task(void *parameter);
+
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 #define CLK_PIN 26       // Define the encoder pins
@@ -47,6 +51,9 @@ int menu = 0;
 void setup()
 {
   Serial.begin(115200);
+
+  // create task for buzzer melody
+  xTaskCreatePinnedToCore(buzzer_task, "buzzer_task", 4096, NULL, 1, &buzzerTask, 1); // create task on core 1
 
   pinMode(CLK_PIN, INPUT);
   pinMode(DT_PIN, INPUT);
@@ -285,13 +292,35 @@ void loop()
     }
     if (buzzer)
     {
-      tone(buzzerPin, 1500);
+      xTaskNotify(buzzerTask, 0, eNoAction);
     }
     relay_update = currentMillis;
   }
   else if (currentMillis - relay_update >= relay_time)
   {
     digitalWrite(RELAY_PIN, HIGH);
+    noTone(buzzerPin);
+  }
+}
+
+void buzzer_task(void *pvParameters)
+{
+  while (1)
+  {
+    // wait for a signal to play the melody
+    ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+
+    // play the melody
+    tone(buzzerPin, 1500);
+    delay(500);
+    noTone(buzzerPin);
+    delay(500);
+    tone(buzzerPin, 1500);
+    delay(500);
+    noTone(buzzerPin);
+    delay(500);
+    tone(buzzerPin, 1500);
+    delay(500);
     noTone(buzzerPin);
   }
 }
