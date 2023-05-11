@@ -251,18 +251,13 @@ void loop()
     preferences.putInt("eCO2_SET", eCO2_SET);
   }
 
-  if ((eCO2 > eCO2_SET || TVOC > TVOC_SET) && (currentMillis - relay_update >= relay_time))
+  if (eCO2 > eCO2_SET || TVOC > TVOC_SET)
   {
     digitalWrite(RELAY_PIN, LOW);
-    tone(buzzerPin, 1000);
+    tone(buzzerPin, 1500);
     relay_update = currentMillis;
   }
-  else if (currentMillis - relay_update < relay_time && currentMillis > 15000)
-  {
-    digitalWrite(RELAY_PIN, LOW);
-    tone(buzzerPin, 100);
-  }
-  else
+  else if (currentMillis - relay_update >= relay_time)
   {
     digitalWrite(RELAY_PIN, HIGH);
     noTone(buzzerPin);
