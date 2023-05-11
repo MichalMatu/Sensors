@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <Wire.h>
 #include <Adafruit_SSD1306.h>
 #include "Adafruit_SGP30.h"
@@ -11,6 +12,8 @@ Preferences preferences;
 #define CLK_PIN 26       // Define the encoder pins
 #define DT_PIN 27        // Define the encoder pins
 #define SW_PIN 25        // Define the encoder pins
+
+const int buzzerPin = 18;
 
 const int RELAY_PIN = 5; // set the pin for the relay
 
@@ -45,6 +48,10 @@ void setup()
   pinMode(CLK_PIN, INPUT);
   pinMode(DT_PIN, INPUT);
   pinMode(SW_PIN, INPUT_PULLUP);
+  pinMode(buzzerPin, OUTPUT);
+  // set buzzer pin to low and relay pin to high by default
+  digitalWrite(buzzerPin, LOW);
+  digitalWrite(RELAY_PIN, HIGH);
 
   pinMode(RELAY_PIN, OUTPUT); // set the relay pin as an output
 
@@ -246,15 +253,18 @@ void loop()
 
   if ((eCO2 > eCO2_SET || TVOC > TVOC_SET) && (currentMillis - relay_update >= relay_time))
   {
-    digitalWrite(RELAY_PIN, HIGH);
+    digitalWrite(RELAY_PIN, LOW);
+    tone(buzzerPin, 1000);
     relay_update = currentMillis;
   }
-  else if (currentMillis - relay_update < relay_time)
+  else if (currentMillis - relay_update < relay_time && currentMillis > 15000)
   {
-    digitalWrite(RELAY_PIN, HIGH);
+    digitalWrite(RELAY_PIN, LOW);
+    tone(buzzerPin, 100);
   }
   else
   {
-    digitalWrite(RELAY_PIN, LOW);
+    digitalWrite(RELAY_PIN, HIGH);
+    noTone(buzzerPin);
   }
 }
