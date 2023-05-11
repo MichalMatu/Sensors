@@ -29,6 +29,8 @@ unsigned long relay_update = 0;
 unsigned long set_time = 0;
 const unsigned long displayUpdateInterval = 100;
 const unsigned long relay_time = 5000;
+unsigned long lastReadingTime = 0;
+unsigned long readingInterval = 500; // 0.5 second interval
 
 // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
@@ -43,6 +45,8 @@ long newPosition = 0;
 int delta = 0;
 int delta1 = 0;
 
+int TVOC;
+int eCO2;
 int TVOC_SET = 50;
 int eCO2_SET = 500;
 
@@ -94,9 +98,15 @@ void loop()
     delay(200);
   }
 
-  sgp.IAQmeasure();
-  int TVOC = sgp.TVOC;
-  int eCO2 = sgp.eCO2;
+  if (currentMillis - lastReadingTime >= readingInterval)
+  {
+    // take sensor readings
+    sgp.IAQmeasure();
+    TVOC = sgp.TVOC;
+    eCO2 = sgp.eCO2;
+    lastReadingTime = currentMillis;
+  }
+
   if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
   {
     display.display();
@@ -130,11 +140,24 @@ void loop()
     display.println("TVOC: ");
     display.setCursor(60, 30);
     display.println(TVOC);
+    // if tvoc is bigger than tvocset display dot
+    if (TVOC > TVOC_SET)
+    {
+      display.setCursor(110, 30);
+      display.print("*");
+    }
+
     // set cursor in new line
     display.setCursor(0, 50);
     display.println("eCO2: ");
     display.setCursor(60, 50);
     display.println(eCO2);
+    // if eco2 is bigger than eco2set display dot
+    if (eCO2 > eCO2_SET)
+    {
+      display.setCursor(110, 50);
+      display.print("*");
+    }
     break;
   case 1:
     TVOC_SET += delta;
@@ -322,4 +345,3 @@ void buzzer_task(void *pvParameters)
     noTone(buzzerPin);
   }
 }
-
