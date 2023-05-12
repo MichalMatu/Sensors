@@ -285,7 +285,7 @@ void loop()
       {
         set_time += 60;
       }
-      else if (delta < 0)
+      else if (delta < 0 && set_time >= 60)
       {
         set_time -= 60;
       }
@@ -305,7 +305,7 @@ void loop()
       {
         set_time += 1;
       }
-      else if (delta < 0)
+      else if (delta < 0 && set_time >= 1)
       {
         set_time -= 1;
       }
