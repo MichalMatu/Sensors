@@ -51,6 +51,7 @@ int TVOC_SET = 50;
 int eCO2_SET = 500;
 
 int menu = 0;
+int menu_clock = 0;
 bool menu_scroll = true;
 
 void setup()
@@ -247,17 +248,8 @@ void loop()
     if (digitalRead(SW_PIN) == LOW)
     {
       menu_scroll = menu_scroll ? false : true;
+      menu_clock++;
       delay(200);
-    }
-
-    // if delta is less than 0 add 60 to set_time if it's bigger than 0 add 1 to set_time
-    if (delta < 0)
-    {
-      set_time += 60;
-    }
-    else if (delta > 0)
-    {
-      set_time += 1;
     }
 
     // declare hours and minutes variables
@@ -284,13 +276,44 @@ void loop()
     {
       display.print("0");
     }
+
     display.print(hours);
+    if (menu_clock == 1)
+    {
+      display.drawLine(20, 63, 55, 63, WHITE);
+      if (delta > 0)
+      {
+        set_time += 60;
+      }
+      else if (delta < 0)
+      {
+        set_time -= 60;
+      }
+    }
     display.print(":");
     if (minutes < 10)
     {
       display.print("0");
     }
+
     display.print(minutes);
+    if (menu_clock == 2)
+    {
+      menu_scroll = false;
+      display.drawLine(75, 63, 110, 63, WHITE);
+      if (delta > 0)
+      {
+        set_time += 1;
+      }
+      else if (delta < 0)
+      {
+        set_time -= 1;
+      }
+    }
+    if (menu_clock > 2)
+    {
+      menu_clock = 0;
+    }
     break;
   case 5:
     if (delta < 0)
