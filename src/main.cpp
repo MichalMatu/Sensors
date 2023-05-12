@@ -359,7 +359,7 @@ void loop()
     }
     if (menu_set == 1)
     {
-      display.drawLine(55, 35, 85, 35, WHITE);
+      display.drawLine(55, 35, 95, 35, WHITE);
     }
     display.setCursor(0, 30);
     display.setTextSize(1);
@@ -376,7 +376,7 @@ void loop()
     }
     if (menu_set == 2)
     {
-      display.drawLine(55, 60, 85, 60, WHITE);
+      display.drawLine(55, 60, 95, 60, WHITE);
     }
     if (menu_set > 2)
     {
