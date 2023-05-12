@@ -51,6 +51,7 @@ int TVOC_SET = 50;
 int eCO2_SET = 500;
 
 int menu = 0;
+bool menu_scroll = true;
 
 void setup()
 {
@@ -92,12 +93,23 @@ void loop()
   delta = newPosition - lastPosition;
   lastPosition = newPosition;
 
-  if (digitalRead(SW_PIN) == LOW)
-  {
-    menu++;
-    delay(200);
-  }
+  // if (digitalRead(SW_PIN) == LOW)
+  // {
+  //   menu++;
+  //   delay(200);
+  // }
 
+  if (menu_scroll)
+  {
+    if (delta > 0)
+    {
+      menu++;
+    }
+    else if (delta < 0)
+    {
+      menu--;
+    }
+  }
   if (currentMillis - lastReadingTime >= readingInterval)
   {
     // take sensor readings
@@ -160,7 +172,12 @@ void loop()
     }
     break;
   case 1:
-    TVOC_SET += delta;
+    if (digitalRead(SW_PIN) == LOW)
+    {
+      menu_scroll = menu_scroll ? false : true;
+      delay(200);
+    }
+
     // display set up alarm point:
     display.clearDisplay();
     display.setTextSize(1);
@@ -172,9 +189,20 @@ void loop()
     display.setCursor(50, 40);
     display.setTextSize(3);
     display.println(TVOC_SET);
+    if (!menu_scroll)
+    {
+      TVOC_SET += delta;
+      display.drawLine(44, 63, 85, 63, WHITE);
+    }
+
     break;
   case 2:
-    eCO2_SET += delta * 10;
+    if (digitalRead(SW_PIN) == LOW)
+    {
+      menu_scroll = menu_scroll ? false : true;
+      delay(200);
+    }
+    
     // display set up alarm point:
     display.clearDisplay();
     display.setTextSize(1);
@@ -187,6 +215,11 @@ void loop()
     display.setCursor(50, 40);
     display.setTextSize(3);
     display.println(eCO2_SET);
+    if (!menu_scroll)
+    {
+      eCO2_SET += delta * 10;
+      display.drawLine(40, 63, 105, 63, WHITE);
+    }
     break;
   case 3:
     // display simply graph with TVOC
