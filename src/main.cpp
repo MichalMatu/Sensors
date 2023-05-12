@@ -52,6 +52,7 @@ int eCO2_SET = 500;
 
 int menu = 0;
 int menu_clock = 0;
+int menu_set = 0;
 bool menu_scroll = true;
 
 void setup()
@@ -193,7 +194,7 @@ void loop()
     if (!menu_scroll)
     {
       TVOC_SET += delta;
-      display.drawLine(44, 63, 85, 63, WHITE);
+      display.drawLine(44, 63, 110, 63, WHITE);
     }
 
     break;
@@ -316,20 +317,37 @@ void loop()
     }
     break;
   case 5:
-    if (delta < 0)
+    if (digitalRead(SW_PIN) == LOW)
     {
-      buzzer = buzzer ? false : true;
+      menu_scroll = menu_scroll ? false : true;
+      menu_set++;
+      delay(200);
     }
-    else if (delta > 0)
+    if (menu_set == 1)
     {
-      relay = relay ? false : true;
+      menu_scroll = false;
+
+      if (delta < 0 || delta > 0)
+      {
+        buzzer = buzzer ? false : true;
+      }
+    }
+
+    if (menu_set == 2)
+    {
+      menu_scroll = false;
+
+      if (delta > 0 || delta < 0)
+      {
+        relay = relay ? false : true;
+      }
     }
     display.clearDisplay();
     display.setTextSize(1);
     display.setTextColor(WHITE);
-    display.setCursor(0, 10);
+    display.setCursor(0, 0);
     display.println("BUZZER:");
-    display.setCursor(50, 25);
+    display.setCursor(60, 15);
     display.setTextSize(2);
     if (buzzer)
     {
@@ -339,10 +357,14 @@ void loop()
     {
       display.println("OFF");
     }
-    display.setCursor(0, 40);
+    if (menu_set == 1)
+    {
+      display.drawLine(55, 35, 85, 35, WHITE);
+    }
+    display.setCursor(0, 30);
     display.setTextSize(1);
     display.println("RELAY:");
-    display.setCursor(50, 50);
+    display.setCursor(60, 40);
     display.setTextSize(2);
     if (relay)
     {
@@ -351,6 +373,15 @@ void loop()
     else
     {
       display.println("OFF");
+    }
+    if (menu_set == 2)
+    {
+      display.drawLine(55, 60, 85, 60, WHITE);
+    }
+    if (menu_set > 2)
+    {
+      menu_set = 0;
+      menu_scroll = true;
     }
     break;
 
