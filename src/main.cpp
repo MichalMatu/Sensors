@@ -202,7 +202,7 @@ void loop()
       menu_scroll = menu_scroll ? false : true;
       delay(200);
     }
-    
+
     // display set up alarm point:
     display.clearDisplay();
     display.setTextSize(1);
@@ -212,13 +212,13 @@ void loop()
     // set cursor in new line
     display.setCursor(0, 50);
     display.println("eCO2: ");
-    display.setCursor(50, 40);
+    display.setCursor(45, 40);
     display.setTextSize(3);
     display.println(eCO2_SET);
     if (!menu_scroll)
     {
       eCO2_SET += delta * 10;
-      display.drawLine(40, 63, 105, 63, WHITE);
+      display.drawLine(40, 63, 120, 63, WHITE);
     }
     break;
   case 3:
@@ -242,7 +242,14 @@ void loop()
     // draw horizontal line on screen on second half of screen with eCO2_set_graph
     display.drawLine(70, 63 - eCO2_set_graph, 117, 63 - eCO2_set_graph, WHITE);
     break;
+
   case 4:
+    if (digitalRead(SW_PIN) == LOW)
+    {
+      menu_scroll = menu_scroll ? false : true;
+      delay(200);
+    }
+
     // if delta is less than 0 add 60 to set_time if it's bigger than 0 add 1 to set_time
     if (delta < 0)
     {
@@ -265,14 +272,14 @@ void loop()
     display.clearDisplay();
     display.setTextSize(1);
     display.setTextColor(WHITE);
-    display.setCursor(0, 10);
-    display.println("TIME:");
-    display.setCursor(0, 20);
+    display.setCursor(0, 0);
+    display.println("CLOCK:");
+    display.setCursor(60, 0);
     display.println("DAY:");
-    display.setCursor(30, 20);
+    display.setCursor(90, 0);
     display.println(day);
     display.setTextSize(3);
-    display.setCursor(20, 40);
+    display.setCursor(20, 35);
     if (hours < 10)
     {
       display.print("0");
