@@ -20,10 +20,6 @@ void buzzer_task(void *parameter);
 const int buzzerPin = 18; // set the pin for the buzzer
 const int RELAY_PIN = 5;  // set the pin for the relay
 
-// declare if relar or buzzer will be in use, set true by default
-bool buzzer = true;
-bool relay = true;
-
 unsigned long lastDisplayUpdate = 0;
 unsigned long relay_update = 0;
 unsigned long set_time = 0;
@@ -47,8 +43,12 @@ int delta1 = 0;
 
 int TVOC;
 int eCO2;
-int TVOC_SET = 50;
-int eCO2_SET = 500;
+
+int TVOC_SET;
+int eCO2_SET;
+bool buzzer;
+bool relay;
+unsigned long currentMillis = 0;
 
 int menu = 0;
 int menu_clock = 0;
@@ -80,8 +80,12 @@ void setup()
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
   sgp.begin();
   preferences.begin("my_app", false);
+  // declare ane retrive tvoc_set and eco2_set from memory if no value set to default
   TVOC_SET = preferences.getInt("TVOC_SET", 50);
   eCO2_SET = preferences.getInt("eCO2_SET", 500);
+  // declare if relar or buzzer will be in use, set true by default
+  buzzer = preferences.getBool("buzzer", true);
+  relay = preferences.getBool("relay", true);
 }
 
 void loop()
@@ -89,7 +93,7 @@ void loop()
   // check what core is being used
   Serial.print("loop() running on core ");
   Serial.println(xPortGetCoreID());
-  unsigned long currentMillis = millis();
+  currentMillis = millis();
 
   newPosition = encoder.getCount() / 2;
   delta = newPosition - lastPosition;
@@ -330,6 +334,7 @@ void loop()
       if (delta < 0 || delta > 0)
       {
         buzzer = buzzer ? false : true;
+        preferences.putBool("buzzer", buzzer);
       }
     }
 
@@ -340,6 +345,7 @@ void loop()
       if (delta > 0 || delta < 0)
       {
         relay = relay ? false : true;
+        preferences.putBool("relay", relay);
       }
     }
     display.clearDisplay();
@@ -400,6 +406,8 @@ void loop()
     preferences.putInt("TVOC_SET", TVOC_SET);
     preferences.putInt("eCO2_SET", eCO2_SET);
   }
+
+  // of buzzer or relay change value from true to false or from false to true
 
   if (eCO2 > eCO2_SET || TVOC > TVOC_SET)
   {
