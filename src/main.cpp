@@ -8,7 +8,6 @@
 Preferences preferences;
 
 TaskHandle_t buzzerTask = NULL; // buzzer task handle
-
 void buzzer_task(void *parameter);
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
@@ -97,9 +96,6 @@ void setup()
 
 void loop()
 {
-  // check what core is being used
-  Serial.print("loop() running on core ");
-  Serial.println(xPortGetCoreID());
   currentMillis = millis();
 
   newPosition = encoder.getCount() / 2;
@@ -441,7 +437,6 @@ void loop()
   else if (currentMillis - relay_update >= relay_time)
   {
     digitalWrite(RELAY_PIN, HIGH);
-    noTone(buzzerPin);
   }
 }
 
