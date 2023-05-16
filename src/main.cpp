@@ -22,8 +22,6 @@ const int RELAY_PIN = 5;  // set the pin for the relay
 unsigned long lastDisplayUpdate = 0;
 unsigned long relay_update = 0;
 unsigned long set_time = 0;
-unsigned long average_time = 0;
-unsigned long average_time_update = 60000;
 const unsigned long displayUpdateInterval = 100;
 const unsigned long relay_time = 5000;
 unsigned long lastReadingTime = 0;
@@ -50,11 +48,6 @@ int eCO2_SET;
 bool buzzer;
 bool relay;
 unsigned long currentMillis = 0;
-
-// average results
-int average_tvoc[1440];
-int average_tvoc_6;
-int average_tvoc_24;
 
 int menu = 0;
 int menu_clock = 0;
@@ -120,12 +113,6 @@ void loop()
     TVOC = sgp.TVOC;
     eCO2 = sgp.eCO2;
     lastReadingTime = currentMillis;
-  }
-
-  if (currentMillis - average_time >= average_time_update)
-  {
-
-    average_time = currentMillis;
   }
 
   if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
@@ -392,16 +379,6 @@ void loop()
       menu_set = 0;
       menu_scroll = true;
     }
-    break;
-
-  case 6:
-    // display AVERAGE TVOC:
-    display.clearDisplay();
-    display.setTextSize(1);
-    display.setTextColor(WHITE);
-    display.setCursor(0, 0);
-    display.println("AVERAGE TVOC:");
-
     break;
 
   case 7:
