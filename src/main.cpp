@@ -417,9 +417,9 @@ void loop()
     display.setTextSize(1);
     display.setTextColor(WHITE);
     display.setCursor(0, 0);
-    display.println("AVERAGE TVOC:");
+    display.println("AVERAGE TVOC 30s:");
     display.setTextSize(2);
-    if (currentMillis > 20000)
+    if (currentMillis > 25000)
     {
       display.setCursor(55, 15);
       display.println(average);
@@ -431,9 +431,9 @@ void loop()
     }
     display.setCursor(0, 35);
     display.setTextSize(1);
-    display.println("AVERAGE eCO2:");
+    display.println("AVERAGE eCO2 30s:");
     display.setTextSize(2);
-    if (currentMillis > 25000)
+    if (currentMillis > 45000)
     {
       display.setCursor(55, 50);
       display.println(average1);
