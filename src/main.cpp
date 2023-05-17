@@ -16,6 +16,16 @@ void buzzer_task(void *parameter);
 #define DT_PIN 27        // Define the encoder pins
 #define SW_PIN 25        // Define the encoder pins
 
+// define buffer size for average sensor readings buffer for tvoc and buffer1 for eCO2
+#define BUFFER_SIZE 60
+int buffer[BUFFER_SIZE];
+int buffer1[BUFFER_SIZE];
+int bufferIndex = 0;
+int sum;
+int sum1;
+int average;
+int average1;
+
 const int buzzerPin = 18; // set the pin for the buzzer
 const int RELAY_PIN = 5;  // set the pin for the relay
 
@@ -112,6 +122,26 @@ void loop()
     sgp.IAQmeasure();
     TVOC = sgp.TVOC;
     eCO2 = sgp.eCO2;
+
+    if (currentMillis > 20000)
+    {
+      // Update buffer with new value
+      buffer[bufferIndex] = TVOC;
+      buffer1[bufferIndex] = eCO2;
+      // Move to the next buffer index
+      bufferIndex = (bufferIndex + 1) % BUFFER_SIZE;
+
+      // Calculate average of the last 60 values
+      sum = 0;
+      sum1 = 0;
+      for (int i = 0; i < BUFFER_SIZE; i++)
+      {
+        sum += buffer[i];
+        sum1 += buffer1[i];
+      }
+      average = sum / BUFFER_SIZE;
+      average1 = sum1 / BUFFER_SIZE;
+    }
     lastReadingTime = currentMillis;
   }
 
@@ -378,6 +408,40 @@ void loop()
     {
       menu_set = 0;
       menu_scroll = true;
+    }
+    break;
+
+  case 6:
+    // display average an screen
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 0);
+    display.println("AVERAGE TVOC:");
+    display.setTextSize(2);
+    if (currentMillis > 20000)
+    {
+      display.setCursor(55, 15);
+      display.println(average);
+    }
+    else
+    {
+      display.setCursor(35, 15);
+      display.println("wait...");
+    }
+    display.setCursor(0, 35);
+    display.setTextSize(1);
+    display.println("AVERAGE eCO2:");
+    display.setTextSize(2);
+    if (currentMillis > 25000)
+    {
+      display.setCursor(55, 50);
+      display.println(average1);
+    }
+    else
+    {
+      display.setCursor(35, 50);
+      display.println("wait...");
     }
     break;
 
