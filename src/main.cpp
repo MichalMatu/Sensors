@@ -162,6 +162,14 @@ void loop()
 
   switch (menu)
   {
+  case -1:
+    // display WI-FI settings:
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setCursor(0, 0);
+    display.print("WiFi Settings:");
+    display.setCursor(0, 1);
+    break;
   case 0:
 
     // display sgp30 readings on whole screen
