@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Menu</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div id="form">
+        <h3>Change Network Credentials</h3>
+        <form action="/save-credentials" method="POST">
+            <label for="ssid">SSID:</label>
+            <input type="text" id="ssid" name="ssid"><br><br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password"><br><br>
+            <input type="submit" value="Save">
+        </form>
+        <a href="index.html">Back to Main Menu</a>
+    </div>
+
+
+
+
+    <script src="script.js"></script>
+</body>
+
+</html>

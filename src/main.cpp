@@ -105,7 +105,7 @@ void setup()
   String submittedPassword = request->arg("password");
 
   // Check if the submitted SSID is not empty and the password has at least 8 characters
-  if (submittedSSID.length() > 0 && submittedPassword.length() >= 8) {
+  if (submittedSSID.length() > 0 && submittedPassword.length() >= 8 && submittedPassword.length() <= 64 && submittedSSID.length() <= 32 && submittedPassword != ssid && submittedSSID != password) {
     // Update the credentials
     strncpy(ssid, submittedSSID.c_str(), sizeof(ssid));
     strncpy(password, submittedPassword.c_str(), sizeof(password));
@@ -114,14 +114,15 @@ void setup()
     Serial.println("Updated SSID: " + String(ssid));
     Serial.println("Updated Password: " + String(password));
 
-    request->send(200, "text/plain", "Credentials updated");
+    request->send(200, "text/plain", "Credentials updated. <a href='/'>Go to Main Page</a>");
+    delay(100);
     // Disconnect any connected clients
     WiFi.softAPdisconnect(true);
     // Configure ESP32 as an access point with new credentials
     WiFi.softAP(ssid, password);
 
   } else {
-    request->send(400, "text/plain", "Invalid credentials. SSID must not be empty and password must have at least 8 characters.");
+    request->send(400, "text/html", "Invalid credentials. SSID must not be empty and password must have at least 8 characters. <a href='/'>Go to Main Page</a>");
   } });
 
   // Start the server
@@ -229,7 +230,16 @@ void loop()
     display.setTextSize(1);
     display.setCursor(0, 0);
     display.print("WiFi Settings:");
-    display.setCursor(0, 1);
+    display.setCursor(0, 10);
+    // display ssid
+    display.print("SSID: ");
+    display.setCursor(0, 20);
+    display.print(ssid);
+    display.setCursor(0, 30);
+    // display password
+    display.print("Password: ");
+    display.setCursor(0, 40);
+    display.print(password);
     break;
   case 0:
 
