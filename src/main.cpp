@@ -114,7 +114,7 @@ void setup()
     Serial.println("Updated SSID: " + String(ssid));
     Serial.println("Updated Password: " + String(password));
 
-    request->send(200, "text/plain", "Credentials updated. <a href='/'>Go to Main Page</a>");
+    request->send(SPIFFS, "/index.html", "text/html");
     delay(100);
     // Disconnect any connected clients
     WiFi.softAPdisconnect(true);
@@ -122,7 +122,7 @@ void setup()
     WiFi.softAP(ssid, password);
 
   } else {
-    request->send(400, "text/html", "Invalid credentials. SSID must not be empty and password must have at least 8 characters. <a href='/'>Go to Main Page</a>");
+    request->send(SPIFFS, "/invalid-credentials.html", "text/html");
   } });
 
   // Start the server
