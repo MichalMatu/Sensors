@@ -96,17 +96,10 @@ void setup()
   // Serve static files from SPIFFS
   server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
 
-  server.on("/tvoc", HTTP_GET, [](AsyncWebServerRequest *request)
+  server.on("/values", HTTP_GET, [](AsyncWebServerRequest *request)
             {
-  // Convert the TVOC value to a string
-  String TVOCs = String(TVOC);
-  request->send(200, "text/plain", TVOCs); });
-
-  server.on("/eco2", HTTP_GET, [](AsyncWebServerRequest *request)
-            {
-  // Convert the eCO2 value to a string
-  String eCO2s = String(eCO2);
-  request->send(200, "text/plain", eCO2s); });
+  String values = "TVOC: " + String(TVOC) + "<br>eCO2: " + String(eCO2);
+  request->send(200, "text/html", values); });
 
   server.on("/save-credentials", HTTP_POST, [](AsyncWebServerRequest *request)
             {
