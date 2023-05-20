@@ -4,6 +4,19 @@
 #include "Adafruit_SGP30.h"
 #include <ESP32Encoder.h>
 
+// wifi and web server
+#include <WiFi.h>
+#include <ESPAsyncWebServer.h>
+
+// Replace with your network credentials
+const char *ssid = "ESP32-Access-Point";
+const char *password = "0123456789";
+// Create an instance of the AsyncWebServer
+AsyncWebServer server(80);
+
+// file system
+#include <SPIFFS.h>
+
 #include <Preferences.h>
 Preferences preferences;
 
@@ -67,6 +80,29 @@ bool menu_scroll = true;
 void setup()
 {
   Serial.begin(115200);
+
+  // Configure ESP32 as an access point
+  WiFi.softAP(ssid, password);
+
+  // Get IP address of the access point
+  IPAddress ip = WiFi.softAPIP();
+  Serial.print("AP IP address: ");
+  Serial.println(ip);
+
+  // Initialize SPIFFS
+  if (!SPIFFS.begin(true))
+  {
+    Serial.println("An error occurred while mounting SPIFFS");
+    return;
+  }
+
+  // Serve static files from SPIFFS
+  server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
+
+  // Start the server
+  server.begin();
+
+  Serial.println("Server started");
 
   // create task for buzzer melody
   xTaskCreatePinnedToCore(buzzer_task, "buzzer_task", 4096, NULL, 1, &buzzerTask, 1); // create task on core 1
