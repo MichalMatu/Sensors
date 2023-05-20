@@ -32,4 +32,4 @@ function updateValues() {
 updateValues();
 
 // Update the TVOC value every 500ms
-setInterval(updateValues, 500);
+setInterval(updateValues, 1000);

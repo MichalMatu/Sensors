@@ -45,10 +45,10 @@ const int RELAY_PIN = 5;  // set the pin for the relay
 unsigned long lastDisplayUpdate = 0;
 unsigned long relay_update = 0;
 unsigned long set_time = 0;
-const unsigned long displayUpdateInterval = 100;
-const unsigned long relay_time = 5000;
 unsigned long lastReadingTime = 0;
-unsigned long readingInterval = 500; // 0.5 second interval
+int displayUpdateInterval = 200;
+int relay_time = 5000;
+int readingInterval = 1000;
 
 // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
@@ -79,22 +79,19 @@ bool menu_scroll = true;
 
 void setup()
 {
-  Serial.begin(115200);
+  // Serial.begin(115200);
 
   // Configure ESP32 as an access point
   WiFi.softAP(ssid, password);
 
   // Get IP address of the access point
   IPAddress ip = WiFi.softAPIP();
-  Serial.print("AP IP address: ");
-  Serial.println(ip);
+
+  // Serial.print("AP IP address: ");
+  // Serial.println(ip);
 
   // Initialize SPIFFS
-  if (!SPIFFS.begin(true))
-  {
-    Serial.println("An error occurred while mounting SPIFFS");
-    return;
-  }
+  SPIFFS.begin(true);
 
   // Serve static files from SPIFFS
   server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
@@ -102,13 +99,13 @@ void setup()
   server.on("/tvoc", HTTP_GET, [](AsyncWebServerRequest *request)
             {
   // Convert the TVOC value to a string
-  String TVOCs = String(sgp.TVOC);
+  String TVOCs = String(TVOC);
   request->send(200, "text/plain", TVOCs); });
 
   server.on("/eco2", HTTP_GET, [](AsyncWebServerRequest *request)
             {
   // Convert the eCO2 value to a string
-  String eCO2s = String(sgp.eCO2);
+  String eCO2s = String(eCO2);
   request->send(200, "text/plain", eCO2s); });
 
   server.on("/save-credentials", HTTP_POST, [](AsyncWebServerRequest *request)
@@ -122,14 +119,9 @@ void setup()
     strncpy(ssid, submittedSSID.c_str(), sizeof(ssid));
     strncpy(password, submittedPassword.c_str(), sizeof(password));
 
-    // Print the updated credentials
-    Serial.println("Updated SSID: " + String(ssid));
-    Serial.println("Updated Password: " + String(password));
-
-    request->send(SPIFFS, "/index.html", "text/html");
-    delay(100);
+    request->send(SPIFFS, "/valid.html", "text/html");
     // Disconnect any connected clients
-    WiFi.softAPdisconnect(true);
+    WiFi.softAPdisconnect();
     // Configure ESP32 as an access point with new credentials
     WiFi.softAP(ssid, password);
 
@@ -140,20 +132,19 @@ void setup()
   // Start the server
   server.begin();
 
-  Serial.println("Server started");
-
   // create task for buzzer melody
   xTaskCreatePinnedToCore(buzzer_task, "buzzer_task", 4096, NULL, 1, &buzzerTask, 1); // create task on core 1
 
   pinMode(CLK_PIN, INPUT);
   pinMode(DT_PIN, INPUT);
   pinMode(SW_PIN, INPUT_PULLUP);
-  pinMode(buzzerPin, OUTPUT);
-  // set buzzer pin to low and relay pin to high by default
-  digitalWrite(buzzerPin, LOW);
-  digitalWrite(RELAY_PIN, HIGH);
 
-  pinMode(RELAY_PIN, OUTPUT); // set the relay pin as an output
+  // set buzzer pin to low and relay pin to high by default
+  pinMode(buzzerPin, OUTPUT);
+  digitalWrite(buzzerPin, LOW);
+  // set the relay pin as an output
+  pinMode(RELAY_PIN, OUTPUT);
+  digitalWrite(RELAY_PIN, HIGH);
 
   encoder.attachHalfQuad(CLK_PIN, DT_PIN);
 
@@ -224,15 +215,6 @@ void loop()
     display.display();
     lastDisplayUpdate = currentMillis;
   }
-
-  // map TVOC 0 - 400 to be in range from 10 to 50
-  int TVOC_graph = map(TVOC, 0, 400, 5, 50);
-  // map eCO2 400 - 2000 to be in range from 10 to 50
-  int eCO2_graph = map(eCO2, 400, 4000, 5, 50);
-  // map tvoc_set to draw horizontal line on screen
-  int TVOC_set_graph = map(TVOC_SET, 0, 400, 5, 50);
-  // map eCO2_set to draw horizontal line on screen
-  int eCO2_set_graph = map(eCO2_SET, 400, 4000, 5, 50);
 
   switch (menu)
   {
@@ -338,29 +320,8 @@ void loop()
       display.drawLine(40, 63, 120, 63, WHITE);
     }
     break;
+
   case 3:
-    // display simply graph with TVOC
-    display.clearDisplay();
-    // display TVOC
-    display.setTextSize(1);
-    display.setTextColor(WHITE);
-    display.setCursor(20, 0);
-    display.println("TVOC");
-    // display eCO2
-    display.setCursor(80, 0);
-    display.println("eCO2");
-    // display TVOC_graph
-    display.fillRect(10, 63 - TVOC_graph, 45, TVOC_graph, WHITE);
-    // display eCO2_graph
-    display.fillRect(70, 63 - eCO2_graph, 48, eCO2_graph, WHITE);
-
-    // draw horizontal line on screen on first half of screen with tvoc_set_graph
-    display.drawLine(10, 63 - TVOC_set_graph, 54, 63 - TVOC_set_graph, WHITE);
-    // draw horizontal line on screen on second half of screen with eCO2_set_graph
-    display.drawLine(70, 63 - eCO2_set_graph, 117, 63 - eCO2_set_graph, WHITE);
-    break;
-
-  case 4:
     if (digitalRead(SW_PIN) == LOW)
     {
       menu_scroll = menu_scroll ? false : true;
@@ -431,7 +392,7 @@ void loop()
       menu_clock = 0;
     }
     break;
-  case 5:
+  case 4:
     if (digitalRead(SW_PIN) == LOW)
     {
       menu_scroll = menu_scroll ? false : true;
@@ -502,7 +463,7 @@ void loop()
     }
     break;
 
-  case 6:
+  case 5:
     // display average an screen
     display.clearDisplay();
     display.setTextSize(1);
@@ -536,7 +497,7 @@ void loop()
     }
     break;
 
-  case 7:
+  case 6:
     // display black screen to save power
     display.clearDisplay();
     display.display();
