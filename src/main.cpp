@@ -77,6 +77,36 @@ void disable_watchdog()
   disableCore1WDT();
 }
 
+void handleValuesRequest(AsyncWebServerRequest *request)
+{
+  String values = "TVOC: " + String(TVOC) + "<br>eCO2: " + String(eCO2);
+  request->send(200, "text/html", values);
+}
+
+void handleSaveCredentialsRequest(AsyncWebServerRequest *request)
+{
+  String submittedSSID = request->arg("ssid");
+  String submittedPassword = request->arg("password");
+
+  // Check if the submitted SSID is not empty and the password has at least 8 characters
+  if (submittedSSID.length() > 0 && submittedPassword.length() >= 8 && submittedPassword.length() <= 64 && submittedSSID.length() <= 32 && submittedPassword != ssid && submittedSSID != password)
+  {
+    // Update the credentials
+    strncpy(ssid, submittedSSID.c_str(), sizeof(ssid));
+    strncpy(password, submittedPassword.c_str(), sizeof(password));
+
+    request->send(SPIFFS, "/valid.html", "text/html");
+    // Disconnect any connected clients
+    WiFi.softAPdisconnect();
+    // Configure ESP32 as an access point with new credentials
+    WiFi.softAP(ssid, password);
+  }
+  else
+  {
+    request->send(SPIFFS, "/invalid-credentials.html", "text/html");
+  }
+}
+
 void setup()
 {
   // Serial.begin(115200);
@@ -94,31 +124,8 @@ void setup()
   // favicons < -- work on this
   // server.serveStatic("/favicon.ico", SPIFFS, "/favicon.ico");
 
-  server.on("/values", HTTP_GET, [](AsyncWebServerRequest *request)
-            {
-  String values = "TVOC: " + String(TVOC) + "<br>eCO2: " + String(eCO2);
-  request->send(200, "text/html", values); });
-
-  server.on("/save-credentials", HTTP_POST, [](AsyncWebServerRequest *request)
-            {
-  String submittedSSID = request->arg("ssid");
-  String submittedPassword = request->arg("password");
-
-  // Check if the submitted SSID is not empty and the password has at least 8 characters
-  if (submittedSSID.length() > 0 && submittedPassword.length() >= 8 && submittedPassword.length() <= 64 && submittedSSID.length() <= 32 && submittedPassword != ssid && submittedSSID != password) {
-    // Update the credentials
-    strncpy(ssid, submittedSSID.c_str(), sizeof(ssid));
-    strncpy(password, submittedPassword.c_str(), sizeof(password));
-
-    request->send(SPIFFS, "/valid.html", "text/html");
-    // Disconnect any connected clients
-    WiFi.softAPdisconnect();
-    // Configure ESP32 as an access point with new credentials
-    WiFi.softAP(ssid, password);
-
-  } else {
-    request->send(SPIFFS, "/invalid-credentials.html", "text/html");
-  } });
+  server.on("/values", HTTP_GET, handleValuesRequest);
+  server.on("/save-credentials", HTTP_POST, handleSaveCredentialsRequest);
 
   // Start the server
   server.begin();
