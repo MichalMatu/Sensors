@@ -3,34 +3,27 @@
 #include <Adafruit_SSD1306.h>
 #include "Adafruit_SGP30.h"
 #include <ESP32Encoder.h>
-
-// wifi and web server
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
+#include <SPIFFS.h>
+#include <Preferences.h>
 
 // Default network credentials
 char ssid[32] = "ESP32AP";
 char password[64] = "0123456789";
-// Create an instance of the AsyncWebServer
-AsyncWebServer server(80);
 
-// file system
-#include <SPIFFS.h>
-
-#include <Preferences.h>
-Preferences preferences;
-
-TaskHandle_t buzzerTask = NULL; // buzzer task handle
 void buzzer_task(void *parameter);
 
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
-#define SCREEN_HEIGHT 64 // OLED display height, in pixels
-#define CLK_PIN 26       // Define the encoder pins
-#define DT_PIN 27        // Define the encoder pins
-#define SW_PIN 25        // Define the encoder pins
+const int SCREEN_WIDTH = 128; // OLED display width, in pixels
+const int SCREEN_HEIGHT = 64; // OLED display height, in pixels
+const int CLK_PIN = 26;       // CLK pin of the rotary encoder
+const int DT_PIN = 27;        // DT pin of the rotary encoder
+const int SW_PIN = 25;        // SW pin of the rotary encoder
+const int buzzerPin = 18;     // buzzer pin
+const int RELAY_PIN = 5;      // relay pin
 
 // define buffer size for average sensor readings buffer for tvoc and buffer1 for eCO2
-#define BUFFER_SIZE 60
+const int BUFFER_SIZE = 60;
 int buffer[BUFFER_SIZE];
 int buffer1[BUFFER_SIZE];
 int bufferIndex = 0;
@@ -39,9 +32,6 @@ int sum1;
 int average;
 int average1;
 
-const int buzzerPin = 18; // set the pin for the buzzer
-const int RELAY_PIN = 5;  // set the pin for the relay
-
 unsigned long lastDisplayUpdate = 0;
 unsigned long relay_update = 0;
 unsigned long set_time = 0;
@@ -49,14 +39,6 @@ unsigned long lastReadingTime = 0;
 int displayUpdateInterval = 200;
 int relay_time = 5000;
 int readingInterval = 1000;
-
-// Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
-
-Adafruit_SGP30 sgp;
-
-// Initialize the encoder
-ESP32Encoder encoder;
 
 long lastPosition = 0;
 long newPosition = 0;
@@ -77,29 +59,30 @@ int menu_clock = 0;
 int menu_set = 0;
 bool menu_scroll = true;
 
+// Create an instances
+AsyncWebServer server(80);
+Preferences preferences;
+TaskHandle_t buzzerTask = NULL; // buzzer task handle
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+Adafruit_SGP30 sgp;
+ESP32Encoder encoder;
+
 void setup()
 {
   // Serial.begin(115200);
 
-  // Configure ESP32 as an access point
   WiFi.softAP(ssid, password);
 
   // Get IP address of the access point
   IPAddress ip = WiFi.softAPIP();
 
-  // Serial.print("AP IP address: ");
-  // Serial.println(ip);
-
-  // Initialize SPIFFS
   SPIFFS.begin(true);
 
   // Serve static files from SPIFFS
   server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
-  
 
   // favicons < -- work on this
   // server.serveStatic("/favicon.ico", SPIFFS, "/favicon.ico");
-  
 
   server.on("/values", HTTP_GET, [](AsyncWebServerRequest *request)
             {
@@ -155,7 +138,7 @@ void setup()
   // declare ane retrive tvoc_set and eco2_set from memory if no value set to default
   TVOC_SET = preferences.getInt("TVOC_SET", 50);
   eCO2_SET = preferences.getInt("eCO2_SET", 500);
-  // declare if relar or buzzer will be in use, set true by default
+  // declare if relay or buzzer will be in use, set true by default
   buzzer = preferences.getBool("buzzer", true);
   relay = preferences.getBool("relay", true);
 }
@@ -232,6 +215,11 @@ void loop()
     display.print("Password: ");
     display.setCursor(0, 40);
     display.print(password);
+    // display ip address
+    display.setCursor(0, 50);
+    display.print("IP: ");
+    display.setCursor(20, 50);
+    display.print(WiFi.softAPIP());
     break;
   case 0:
 
