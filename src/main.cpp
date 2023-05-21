@@ -67,6 +67,16 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 Adafruit_SGP30 sgp;
 ESP32Encoder encoder;
 
+#if !(USING_DEFAULT_ARDUINO_LOOP_STACK_SIZE)
+uint16_t USER_CONFIG_ARDUINO_LOOP_STACK_SIZE = 8192;
+#endif
+
+void disable_watchdog()
+{
+  disableCore0WDT();
+  disableCore1WDT();
+}
+
 void setup()
 {
   // Serial.begin(115200);
