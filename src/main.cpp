@@ -95,6 +95,11 @@ void setup()
 
   // Serve static files from SPIFFS
   server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
+  
+
+  // favicons < -- work on this
+  // server.serveStatic("/favicon.ico", SPIFFS, "/favicon.ico");
+  
 
   server.on("/values", HTTP_GET, [](AsyncWebServerRequest *request)
             {
