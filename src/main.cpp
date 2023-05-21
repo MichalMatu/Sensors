@@ -107,6 +107,36 @@ void handleSaveCredentialsRequest(AsyncWebServerRequest *request)
   }
 }
 
+void handleToggleBuzzer(AsyncWebServerRequest *request)
+{
+  // Toggle the buzzer state
+  buzzer = buzzer ? false : true;
+
+  // Send the current buzzer state as the response
+  request->send(200, "text/plain", String(buzzer));
+}
+
+void handleToggleRelay(AsyncWebServerRequest *request)
+{
+  // Toggle the relay state
+  relay = relay ? false : true;
+
+  // Send the current relay state as the response
+  request->send(200, "text/plain", String(relay));
+}
+
+void handleGetBuzzerStatus(AsyncWebServerRequest *request)
+{
+  String buzzerStatus = (buzzer) ? "on" : "off";
+  request->send(200, "text/plain", buzzerStatus);
+}
+
+void handleGetRelayStatus(AsyncWebServerRequest *request)
+{
+  String relayStatus = (relay) ? "on" : "off";
+  request->send(200, "text/plain", relayStatus);
+}
+
 void setup()
 {
   // Serial.begin(115200);
@@ -123,9 +153,15 @@ void setup()
 
   // favicons < -- work on this
   // server.serveStatic("/favicon.ico", SPIFFS, "/favicon.ico");
+  server.on("/save-credentials", HTTP_POST, handleSaveCredentialsRequest);
 
   server.on("/values", HTTP_GET, handleValuesRequest);
-  server.on("/save-credentials", HTTP_POST, handleSaveCredentialsRequest);
+  server.on("/toggle-buzzer", HTTP_GET, handleToggleBuzzer);
+  server.on("/toggle-relay", HTTP_GET, handleToggleRelay);
+  // only if buzzer or relay change value from true to false or from false to true
+
+  server.on("/get-buzzer-status", HTTP_GET, handleGetBuzzerStatus);
+  server.on("/get-relay-status", HTTP_GET, handleGetRelayStatus);
 
   // Start the server
   server.begin();
