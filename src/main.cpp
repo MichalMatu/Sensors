@@ -208,18 +208,26 @@ void loop()
     display.setCursor(0, 10);
     // display ssid
     display.print("SSID: ");
-    display.setCursor(0, 20);
+    display.setCursor(30, 10);
     display.print(ssid);
-    display.setCursor(0, 30);
+    display.setCursor(0, 20);
     // display password
-    display.print("Password: ");
-    display.setCursor(0, 40);
+    display.print("Pass: ");
+    display.setCursor(30, 20);
     display.print(password);
     // display ip address
-    display.setCursor(0, 50);
+    display.setCursor(0, 30);
     display.print("IP: ");
-    display.setCursor(20, 50);
+    display.setCursor(20, 30);
     display.print(WiFi.softAPIP());
+    // display mac address
+    display.setCursor(0, 40);
+    display.print(WiFi.softAPmacAddress());
+    // display wifi status
+    display.setCursor(0, 50);
+    display.print("Status: ");
+    display.setCursor(45, 50);
+    display.print(WiFi.status());
     break;
   case 0:
 
