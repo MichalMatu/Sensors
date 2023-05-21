@@ -14,11 +14,17 @@
         <a href="wifi.html">Wi-Fi Settings</a>
     </p>
     <p id="values"></p>
-
-
-
-
-
+    <p>Settings:</p>
+    <div>
+        <button id="toggleButton" onclick="toggleBuzzer()">Toggle Buzzer</button>
+        <button id="toggleRelay" onclick="toggleRelay()">Toggle Relay</button>
+    </div>
+    <div>
+        <p>Buzzer is: </p>
+        <p id="buzzerStatus"></p>
+        <p>Relay is:</p>
+        <p id="relayStatus"></p>
+    </div>
     <script src="script.js"></script>
 </body>
 
