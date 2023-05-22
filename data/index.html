@@ -20,6 +20,20 @@
         <button id="toggleRelay" onclick="toggleRelay()">Toggle Relay</button>
     </div>
 
+    <div id="setTVOC">
+        <h3>Set TVOC:</h3>
+        <form id="tvocForm" action="/set-tvoc" method="POST">
+            <label for="tvocInput">Enter a TVOC value:</label>
+            <input type="number" id="tvocInput" name="tvoc_set">
+            <button type="submit">Set</button>
+        </form>
+    </div>
+
+
+
+
+
+
     <script src="script.js"></script>
 </body>
 

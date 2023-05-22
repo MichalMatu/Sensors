@@ -69,7 +69,7 @@ void handleValuesRequest(AsyncWebServerRequest *request)
 {
   String buzzer_status = buzzer ? "ON" : "OFF";
   String relay_status = relay ? "ON" : "OFF";
-  String values = "TVOC: " + String(TVOC) + "<br>eCO2: " + String(eCO2) + "<br>Buzzer: " + String(buzzer_status) + "<br>Relay: " + String(relay_status);
+  String values = "TVOC: " + String(TVOC) + "<br>eCO2: " + String(eCO2) + "<br>Buzzer: " + String(buzzer_status) + "<br>Relay: " + String(relay_status) + "<br>TVOC_SET: " + String(TVOC_SET) + "<br>eCO2_SET: " + String(eCO2_SET);
 
   request->send(200, "text/html", values);
 }
@@ -110,9 +110,27 @@ void handleToggleRelay(AsyncWebServerRequest *request)
   relay = relay ? false : true;
 }
 
+void handleTvocSetRequest(AsyncWebServerRequest *request)
+{
+  // Get the submitted tvoc set value
+  String submittedTvocSet = request->arg("tvoc_set");
+  Serial.println(submittedTvocSet);
+
+  // Check if the submitted tvoc set value is not empty
+  if (submittedTvocSet.length() > 0)
+  {
+    // Update the tvoc set value
+    TVOC_SET = submittedTvocSet.toInt();
+    preferences.putInt("TVOC_SET", TVOC_SET);
+  }
+
+  // Send a response back to the client without redirection or refresh
+  request->send(200, "text/plain", "TVOC set successfully");
+}
+
 void setup()
 {
-  // Serial.begin(115200);
+  Serial.begin(115200);
 
   WiFi.softAP(ssid, password);
 
@@ -131,6 +149,7 @@ void setup()
   server.on("/values", HTTP_GET, handleValuesRequest);
   server.on("/toggle-buzzer", HTTP_GET, handleToggleBuzzer);
   server.on("/toggle-relay", HTTP_GET, handleToggleRelay);
+  server.on("/set-tvoc", HTTP_POST, handleTvocSetRequest);
 
   // Start the server
   server.begin();
