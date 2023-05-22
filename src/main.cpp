@@ -113,18 +113,6 @@ void handleToggleRelay(AsyncWebServerRequest *request)
   request->send(200, "text/plain", String(relay));
 }
 
-void handleGetBuzzerStatus(AsyncWebServerRequest *request)
-{
-  String buzzerStatus = (buzzer) ? "on" : "off";
-  request->send(200, "text/plain", buzzerStatus);
-}
-
-void handleGetRelayStatus(AsyncWebServerRequest *request)
-{
-  String relayStatus = (relay) ? "on" : "off";
-  request->send(200, "text/plain", relayStatus);
-}
-
 void setup()
 {
   // Serial.begin(115200);
@@ -146,10 +134,6 @@ void setup()
   server.on("/values", HTTP_GET, handleValuesRequest);
   server.on("/toggle-buzzer", HTTP_GET, handleToggleBuzzer);
   server.on("/toggle-relay", HTTP_GET, handleToggleRelay);
-  // only if buzzer or relay change value from true to false or from false to true
-
-  server.on("/get-buzzer-status", HTTP_GET, handleGetBuzzerStatus);
-  server.on("/get-relay-status", HTTP_GET, handleGetRelayStatus);
 
   // Start the server
   server.begin();
