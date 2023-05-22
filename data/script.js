@@ -1,3 +1,5 @@
+// platformio run --target uploadfs --environment esp32doit-devkit-v1
+
 function updateValues() {
   fetch("/values")
     .then((response) => response.text())
@@ -84,4 +86,4 @@ function update() {
   fetchRelayStatus();
 }
 
-setInterval(update, 1000);
+setInterval(update, 500);
