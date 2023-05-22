@@ -14,23 +14,11 @@ char password[64] = "0123456789";
 
 void buzzer_task(void *parameter);
 
-const int SCREEN_WIDTH = 128; // OLED display width, in pixels
-const int SCREEN_HEIGHT = 64; // OLED display height, in pixels
-const int CLK_PIN = 26;       // CLK pin of the rotary encoder
-const int DT_PIN = 27;        // DT pin of the rotary encoder
-const int SW_PIN = 25;        // SW pin of the rotary encoder
-const int buzzerPin = 18;     // buzzer pin
-const int RELAY_PIN = 5;      // relay pin
-
-// define buffer size for average sensor readings buffer for tvoc and buffer1 for eCO2
-const int BUFFER_SIZE = 60;
-int buffer[BUFFER_SIZE];
-int buffer1[BUFFER_SIZE];
-int bufferIndex = 0;
-int sum;
-int sum1;
-int average;
-int average1;
+const int CLK_PIN = 26;   // CLK pin of the rotary encoder
+const int DT_PIN = 27;    // DT pin of the rotary encoder
+const int SW_PIN = 25;    // SW pin of the rotary encoder
+const int buzzerPin = 18; // buzzer pin
+const int RELAY_PIN = 5;  // relay pin
 
 unsigned long lastDisplayUpdate = 0;
 unsigned long relay_update = 0;
@@ -63,7 +51,7 @@ bool menu_scroll = true;
 AsyncWebServer server(80);
 Preferences preferences;
 TaskHandle_t buzzerTask = NULL; // buzzer task handle
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+Adafruit_SSD1306 display(128, 64, &Wire, -1);
 Adafruit_SGP30 sgp;
 ESP32Encoder encoder;
 
@@ -221,26 +209,6 @@ void loop()
     sgp.IAQmeasure();
     TVOC = sgp.TVOC;
     eCO2 = sgp.eCO2;
-
-    if (currentMillis > 20000)
-    {
-      // Update buffer with new value
-      buffer[bufferIndex] = TVOC;
-      buffer1[bufferIndex] = eCO2;
-      // Move to the next buffer index
-      bufferIndex = (bufferIndex + 1) % BUFFER_SIZE;
-
-      // Calculate average of the last 60 values
-      sum = 0;
-      sum1 = 0;
-      for (int i = 0; i < BUFFER_SIZE; i++)
-      {
-        sum += buffer[i];
-        sum1 += buffer1[i];
-      }
-      average = sum / BUFFER_SIZE;
-      average1 = sum1 / BUFFER_SIZE;
-    }
     lastReadingTime = currentMillis;
   }
 
@@ -516,38 +484,15 @@ void loop()
     display.setTextSize(1);
     display.setTextColor(WHITE);
     display.setCursor(0, 0);
-    display.println("AVERAGE TVOC 30s:");
-    display.setTextSize(2);
-    if (currentMillis > 60000)
-    {
-      display.setCursor(55, 15);
-      display.println(average);
-    }
-    else
-    {
-      display.setCursor(35, 15);
-      display.println("wait...");
-    }
+    display.println("MAX TVOC:");
     display.setCursor(0, 35);
     display.setTextSize(1);
-    display.println("AVERAGE eCO2 30s:");
-    display.setTextSize(2);
-    if (currentMillis > 60000)
-    {
-      display.setCursor(55, 50);
-      display.println(average1);
-    }
-    else
-    {
-      display.setCursor(35, 50);
-      display.println("wait...");
-    }
+    display.println("MAX eCO2:");
     break;
 
   case 6:
     // display black screen to save power
     display.clearDisplay();
-    display.display();
     break;
   default:
     menu = 0;
