@@ -67,7 +67,9 @@ void disable_watchdog()
 
 void handleValuesRequest(AsyncWebServerRequest *request)
 {
-  String values = "TVOC: " + String(TVOC) + "<br>eCO2: " + String(eCO2) + "<br>Buzzer: " + String(buzzer) + "<br>Relay: " + String(relay);
+  String buzzer_status = buzzer ? "ON" : "OFF";
+  String relay_status = relay ? "ON" : "OFF";
+  String values = "TVOC: " + String(TVOC) + "<br>eCO2: " + String(eCO2) + "<br>Buzzer: " + String(buzzer_status) + "<br>Relay: " + String(relay_status);
 
   request->send(200, "text/html", values);
 }
