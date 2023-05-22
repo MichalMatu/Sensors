@@ -25,6 +25,21 @@
         <p>Relay is:</p>
         <p id="relayStatus"></p>
     </div>
+    <!-- display slider that can on change set the TVOC_SET value on esp32, in range form 0 to 200.-->
+
+    <div>
+        <p>TVOC Setpoint:</p>
+        <input type="range" min="0" max="200" value="0" class="slider" id="tvocSlider"
+            oninput="tvocSliderChange(this.value)">
+        <p id="tvocValue"></p>
+    </div>
+    <div>
+        <p>CO2 Setpoint:</p>
+        <input type="range" min="0" max="2000" value="0" class="slider" id="co2Slider"
+            oninput="co2SliderChange(this.value)">
+        <p id="co2Value"></p>
+    </div>
+
     <script src="script.js"></script>
 </body>
 

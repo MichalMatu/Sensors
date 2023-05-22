@@ -195,323 +195,313 @@ void loop()
     eCO2 = sgp.eCO2;
     lastReadingTime = currentMillis;
   }
-  if (WiFi.softAPgetStationNum() == 0)
+  newPosition = encoder.getCount() / 2;
+  delta = newPosition - lastPosition;
+  lastPosition = newPosition;
+
+  if (menu_scroll)
   {
-    display.ssd1306_command(SSD1306_DISPLAYON);
-    newPosition = encoder.getCount() / 2;
-    delta = newPosition - lastPosition;
-    lastPosition = newPosition;
-
-    if (menu_scroll)
+    if (delta > 0)
     {
-      if (delta > 0)
-      {
-        menu++;
-      }
-      else if (delta < 0)
-      {
-        menu--;
-      }
+      menu++;
     }
-
-    if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
+    else if (delta < 0)
     {
-      display.display();
-      lastDisplayUpdate = currentMillis;
-    }
-
-    switch (menu)
-    {
-    case -1:
-      // display WI-FI settings:
-      display.clearDisplay();
-      display.setTextSize(1);
-      display.setCursor(0, 0);
-      display.print("WiFi Settings:");
-      display.setCursor(0, 10);
-      // display ssid
-      display.print("SSID: ");
-      display.setCursor(30, 10);
-      display.print(ssid);
-      display.setCursor(0, 20);
-      // display password
-      display.print("Pass: ");
-      display.setCursor(30, 20);
-      display.print(password);
-      // display ip address
-      display.setCursor(0, 30);
-      display.print("IP: ");
-      display.setCursor(20, 30);
-      display.print(WiFi.softAPIP());
-      // display mac address
-      display.setCursor(0, 40);
-      display.print(WiFi.softAPmacAddress());
-      // display wifi status
-      display.setCursor(0, 50);
-      display.print("Status: ");
-      display.setCursor(45, 50);
-      display.print(WiFi.softAPgetStationNum());
-      break;
-    case 0:
-
-      // display sgp30 readings on whole screen
-      display.clearDisplay();
-      display.setTextSize(2);
-      display.setTextColor(WHITE);
-      display.setCursor(0, 10);
-      display.println("SGP30:");
-      display.setTextSize(1);
-      display.setCursor(100, 10);
-      display.println(currentMillis / 60000);
-      display.setTextSize(2);
-      display.setCursor(0, 30);
-      display.println("TVOC: ");
-      display.setCursor(60, 30);
-      display.println(TVOC);
-      // if tvoc is bigger than tvocset display dot
-      if (TVOC > TVOC_SET)
-      {
-        display.setCursor(110, 30);
-        display.print("*");
-      }
-
-      // set cursor in new line
-      display.setCursor(0, 50);
-      display.println("eCO2: ");
-      display.setCursor(60, 50);
-      display.println(eCO2);
-      // if eco2 is bigger than eco2set display dot
-      if (eCO2 > eCO2_SET)
-      {
-        display.setCursor(110, 50);
-        display.print("*");
-      }
-      break;
-    case 1:
-      if (digitalRead(SW_PIN) == LOW)
-      {
-        menu_scroll = menu_scroll ? false : true;
-        delay(200);
-      }
-
-      // display set up alarm point:
-      display.clearDisplay();
-      display.setTextSize(1);
-      display.setTextColor(WHITE);
-      display.setCursor(0, 10);
-      display.println("SET UP ALARM POINT:");
-      display.setCursor(0, 30);
-      display.println("TVOC: ");
-      display.setCursor(50, 40);
-      display.setTextSize(3);
-      display.println(TVOC_SET);
-      if (!menu_scroll)
-      {
-        TVOC_SET += delta;
-        display.drawLine(44, 63, 110, 63, WHITE);
-      }
-
-      break;
-    case 2:
-      if (digitalRead(SW_PIN) == LOW)
-      {
-        menu_scroll = menu_scroll ? false : true;
-        delay(200);
-      }
-
-      // display set up alarm point:
-      display.clearDisplay();
-      display.setTextSize(1);
-      display.setTextColor(WHITE);
-      display.setCursor(0, 10);
-      display.println("SET UP ALARM POINT:");
-      // set cursor in new line
-      display.setCursor(0, 50);
-      display.println("eCO2: ");
-      display.setCursor(45, 40);
-      display.setTextSize(3);
-      display.println(eCO2_SET);
-      if (!menu_scroll)
-      {
-        eCO2_SET += delta * 10;
-        display.drawLine(40, 63, 120, 63, WHITE);
-      }
-      break;
-
-    case 3:
-      if (digitalRead(SW_PIN) == LOW)
-      {
-        menu_scroll = menu_scroll ? false : true;
-        menu_clock++;
-        delay(200);
-      }
-
-      // declare hours and minutes variables
-      int day;
-      int hours;
-      int minutes;
-      // calculate hours and minutes, and limit their values to 24 and 60, respectively
-      hours = (currentMillis / 60000 + set_time) / 60 % 24;
-      minutes = (currentMillis / 60000 + set_time) % 60;
-      day = (currentMillis / 60000 + set_time) / 1440;
-      // display time on screen
-      display.clearDisplay();
-      display.setTextSize(1);
-      display.setTextColor(WHITE);
-      display.setCursor(0, 0);
-      display.println("CLOCK:");
-      display.setCursor(60, 0);
-      display.println("DAY:");
-      display.setCursor(90, 0);
-      display.println(day);
-      display.setTextSize(3);
-      display.setCursor(20, 35);
-      if (hours < 10)
-      {
-        display.print("0");
-      }
-
-      display.print(hours);
-      if (menu_clock == 1)
-      {
-        display.drawLine(20, 63, 55, 63, WHITE);
-        if (delta > 0)
-        {
-          set_time += 60;
-        }
-        else if (delta < 0 && set_time >= 60)
-        {
-          set_time -= 60;
-        }
-      }
-      display.print(":");
-      if (minutes < 10)
-      {
-        display.print("0");
-      }
-
-      display.print(minutes);
-      if (menu_clock == 2)
-      {
-        menu_scroll = false;
-        display.drawLine(75, 63, 110, 63, WHITE);
-        if (delta > 0)
-        {
-          set_time += 1;
-        }
-        else if (delta < 0 && set_time >= 1)
-        {
-          set_time -= 1;
-        }
-      }
-      if (menu_clock > 2)
-      {
-        menu_clock = 0;
-      }
-      break;
-    case 4:
-      if (digitalRead(SW_PIN) == LOW)
-      {
-        menu_scroll = menu_scroll ? false : true;
-        menu_set++;
-        delay(200);
-      }
-      if (menu_set == 1)
-      {
-        menu_scroll = false;
-
-        if (delta < 0 || delta > 0)
-        {
-          buzzer = buzzer ? false : true;
-          preferences.putBool("buzzer", buzzer);
-        }
-      }
-
-      if (menu_set == 2)
-      {
-        menu_scroll = false;
-
-        if (delta > 0 || delta < 0)
-        {
-          relay = relay ? false : true;
-          preferences.putBool("relay", relay);
-        }
-      }
-      display.clearDisplay();
-      display.setTextSize(1);
-      display.setTextColor(WHITE);
-      display.setCursor(0, 0);
-      display.println("BUZZER:");
-      display.setCursor(60, 15);
-      display.setTextSize(2);
-      if (buzzer)
-      {
-        display.println("ON");
-      }
-      else
-      {
-        display.println("OFF");
-      }
-      if (menu_set == 1)
-      {
-        display.drawLine(55, 35, 95, 35, WHITE);
-      }
-      display.setCursor(0, 30);
-      display.setTextSize(1);
-      display.println("RELAY:");
-      display.setCursor(60, 40);
-      display.setTextSize(2);
-      if (relay)
-      {
-        display.println("ON");
-      }
-      else
-      {
-        display.println("OFF");
-      }
-      if (menu_set == 2)
-      {
-        display.drawLine(55, 60, 95, 60, WHITE);
-      }
-      if (menu_set > 2)
-      {
-        menu_set = 0;
-        menu_scroll = true;
-      }
-      break;
-
-    case 5:
-      // display average an screen
-      display.clearDisplay();
-      display.setTextSize(1);
-      display.setTextColor(WHITE);
-      display.setCursor(0, 0);
-      display.println("MAX TVOC:");
-      display.setCursor(0, 35);
-      display.setTextSize(1);
-      display.println("MAX eCO2:");
-      break;
-
-    case 6:
-      // display black screen to save power
-      display.clearDisplay();
-      break;
-    default:
-      menu = 0;
-      break;
-    }
-
-    if (delta != 0 || delta1 != 0)
-    {
-      preferences.putInt("TVOC_SET", TVOC_SET);
-      preferences.putInt("eCO2_SET", eCO2_SET);
+      menu--;
     }
   }
-  else
+
+  if (currentMillis - lastDisplayUpdate >= displayUpdateInterval)
   {
+    display.display();
+    lastDisplayUpdate = currentMillis;
+  }
+
+  switch (menu)
+  {
+  case -1:
+    // display WI-FI settings:
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setCursor(0, 0);
+    display.print("WiFi Settings:");
+    display.setCursor(0, 10);
+    // display ssid
+    display.print("SSID: ");
+    display.setCursor(30, 10);
+    display.print(ssid);
+    display.setCursor(0, 20);
+    // display password
+    display.print("Pass: ");
+    display.setCursor(30, 20);
+    display.print(password);
+    // display ip address
+    display.setCursor(0, 30);
+    display.print("IP: ");
+    display.setCursor(20, 30);
+    display.print(WiFi.softAPIP());
+    // display mac address
+    display.setCursor(0, 40);
+    display.print(WiFi.softAPmacAddress());
+    // display wifi status
+    display.setCursor(0, 50);
+    display.print("Status: ");
+    display.setCursor(45, 50);
+    display.print(WiFi.softAPgetStationNum());
+    break;
+  case 0:
+
+    // display sgp30 readings on whole screen
+    display.clearDisplay();
+    display.setTextSize(2);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 10);
+    display.println("SGP30:");
+    display.setTextSize(1);
+    display.setCursor(100, 10);
+    display.println(currentMillis / 60000);
+    display.setTextSize(2);
+    display.setCursor(0, 30);
+    display.println("TVOC: ");
+    display.setCursor(60, 30);
+    display.println(TVOC);
+    // if tvoc is bigger than tvocset display dot
+    if (TVOC > TVOC_SET)
+    {
+      display.setCursor(110, 30);
+      display.print("*");
+    }
+
+    // set cursor in new line
+    display.setCursor(0, 50);
+    display.println("eCO2: ");
+    display.setCursor(60, 50);
+    display.println(eCO2);
+    // if eco2 is bigger than eco2set display dot
+    if (eCO2 > eCO2_SET)
+    {
+      display.setCursor(110, 50);
+      display.print("*");
+    }
+    break;
+  case 1:
+    if (digitalRead(SW_PIN) == LOW)
+    {
+      menu_scroll = menu_scroll ? false : true;
+      delay(200);
+    }
+
+    // display set up alarm point:
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 10);
+    display.println("SET UP ALARM POINT:");
+    display.setCursor(0, 30);
+    display.println("TVOC: ");
+    display.setCursor(50, 40);
+    display.setTextSize(3);
+    display.println(TVOC_SET);
+    if (!menu_scroll)
+    {
+      TVOC_SET += delta;
+      display.drawLine(44, 63, 110, 63, WHITE);
+    }
+
+    break;
+  case 2:
+    if (digitalRead(SW_PIN) == LOW)
+    {
+      menu_scroll = menu_scroll ? false : true;
+      delay(200);
+    }
+
+    // display set up alarm point:
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 10);
+    display.println("SET UP ALARM POINT:");
+    // set cursor in new line
+    display.setCursor(0, 50);
+    display.println("eCO2: ");
+    display.setCursor(45, 40);
+    display.setTextSize(3);
+    display.println(eCO2_SET);
+    if (!menu_scroll)
+    {
+      eCO2_SET += delta * 10;
+      display.drawLine(40, 63, 120, 63, WHITE);
+    }
+    break;
+
+  case 3:
+    if (digitalRead(SW_PIN) == LOW)
+    {
+      menu_scroll = menu_scroll ? false : true;
+      menu_clock++;
+      delay(200);
+    }
+
+    // declare hours and minutes variables
+    int day;
+    int hours;
+    int minutes;
+    // calculate hours and minutes, and limit their values to 24 and 60, respectively
+    hours = (currentMillis / 60000 + set_time) / 60 % 24;
+    minutes = (currentMillis / 60000 + set_time) % 60;
+    day = (currentMillis / 60000 + set_time) / 1440;
+    // display time on screen
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 0);
+    display.println("CLOCK:");
+    display.setCursor(60, 0);
+    display.println("DAY:");
+    display.setCursor(90, 0);
+    display.println(day);
+    display.setTextSize(3);
+    display.setCursor(20, 35);
+    if (hours < 10)
+    {
+      display.print("0");
+    }
+
+    display.print(hours);
+    if (menu_clock == 1)
+    {
+      display.drawLine(20, 63, 55, 63, WHITE);
+      if (delta > 0)
+      {
+        set_time += 60;
+      }
+      else if (delta < 0 && set_time >= 60)
+      {
+        set_time -= 60;
+      }
+    }
+    display.print(":");
+    if (minutes < 10)
+    {
+      display.print("0");
+    }
+
+    display.print(minutes);
+    if (menu_clock == 2)
+    {
+      menu_scroll = false;
+      display.drawLine(75, 63, 110, 63, WHITE);
+      if (delta > 0)
+      {
+        set_time += 1;
+      }
+      else if (delta < 0 && set_time >= 1)
+      {
+        set_time -= 1;
+      }
+    }
+    if (menu_clock > 2)
+    {
+      menu_clock = 0;
+    }
+    break;
+  case 4:
+    if (digitalRead(SW_PIN) == LOW)
+    {
+      menu_scroll = menu_scroll ? false : true;
+      menu_set++;
+      delay(200);
+    }
+    if (menu_set == 1)
+    {
+      menu_scroll = false;
+
+      if (delta < 0 || delta > 0)
+      {
+        buzzer = buzzer ? false : true;
+        preferences.putBool("buzzer", buzzer);
+      }
+    }
+
+    if (menu_set == 2)
+    {
+      menu_scroll = false;
+
+      if (delta > 0 || delta < 0)
+      {
+        relay = relay ? false : true;
+        preferences.putBool("relay", relay);
+      }
+    }
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 0);
+    display.println("BUZZER:");
+    display.setCursor(60, 15);
+    display.setTextSize(2);
+    if (buzzer)
+    {
+      display.println("ON");
+    }
+    else
+    {
+      display.println("OFF");
+    }
+    if (menu_set == 1)
+    {
+      display.drawLine(55, 35, 95, 35, WHITE);
+    }
+    display.setCursor(0, 30);
+    display.setTextSize(1);
+    display.println("RELAY:");
+    display.setCursor(60, 40);
+    display.setTextSize(2);
+    if (relay)
+    {
+      display.println("ON");
+    }
+    else
+    {
+      display.println("OFF");
+    }
+    if (menu_set == 2)
+    {
+      display.drawLine(55, 60, 95, 60, WHITE);
+    }
+    if (menu_set > 2)
+    {
+      menu_set = 0;
+      menu_scroll = true;
+    }
+    break;
+
+  case 5:
+    // display average an screen
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 0);
+    display.println("MAX TVOC:");
+    display.setCursor(0, 35);
+    display.setTextSize(1);
+    display.println("MAX eCO2:");
+    break;
+
+  case 6:
     // display black screen to save power
-    //
-    display.ssd1306_command(SSD1306_DISPLAYOFF);
+    display.clearDisplay();
+    break;
+  default:
+    menu = 0;
+    break;
+  }
+
+  if (delta != 0 || delta1 != 0)
+  {
+    preferences.putInt("TVOC_SET", TVOC_SET);
+    preferences.putInt("eCO2_SET", eCO2_SET);
   }
   // of buzzer or relay change value from true to false or from false to true
 
