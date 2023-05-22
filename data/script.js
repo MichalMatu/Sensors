@@ -86,4 +86,4 @@ function update() {
   fetchRelayStatus();
 }
 
-setInterval(update, 1000);
+setInterval(update, 2000);
