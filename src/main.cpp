@@ -67,7 +67,8 @@ void disable_watchdog()
 
 void handleValuesRequest(AsyncWebServerRequest *request)
 {
-  String values = "TVOC: " + String(TVOC) + "<br>eCO2: " + String(eCO2);
+  String values = "TVOC: " + String(TVOC) + "<br>eCO2: " + String(eCO2) + "<br>Buzzer: " + String(buzzer) + "<br>Relay: " + String(relay);
+
   request->send(200, "text/html", values);
 }
 
@@ -99,18 +100,12 @@ void handleToggleBuzzer(AsyncWebServerRequest *request)
 {
   // Toggle the buzzer state
   buzzer = buzzer ? false : true;
-
-  // Send the current buzzer state as the response
-  request->send(200, "text/plain", String(buzzer));
 }
 
 void handleToggleRelay(AsyncWebServerRequest *request)
 {
   // Toggle the relay state
   relay = relay ? false : true;
-
-  // Send the current relay state as the response
-  request->send(200, "text/plain", String(relay));
 }
 
 void setup()
